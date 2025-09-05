@@ -4,6 +4,6 @@
     "outDir": "dist",
     "rootDir": "."
   },
-  "include": ["src", "codama", "instructions", "idls"],
+  "include": ["src", "src/codama", "src/instructions", "idls"],
   "exclude": ["dist"]
 }

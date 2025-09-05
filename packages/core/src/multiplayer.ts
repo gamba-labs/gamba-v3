@@ -1,3 +1,3 @@
-export * from '../codama/multiplayer';
+export * from './codama/multiplayer';
 
 

@@ -1,4 +1,4 @@
-import { multiplayer as mp, pdas } from '../../src'
+import { multiplayer as mp, pdas } from '../..'
 import type { Address } from '@solana/kit'
 
 type BuildJoinGameIxParams = {

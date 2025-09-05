@@ -1,3 +1,3 @@
-export * from '../codama/core';
+export * from './codama/core';
 
 

@@ -1,4 +1,4 @@
-import { core, pdas } from '../../src'
+import { core, pdas } from '../..'
 import type { Address } from '@solana/kit'
 
 type BuildPlayGameIxParams = {

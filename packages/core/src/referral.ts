@@ -1,3 +1,3 @@
-export * from '../codama/referral';
+export * from './codama/referral';
 
 
