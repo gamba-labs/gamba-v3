@@ -2,6 +2,7 @@ import {
   getProgramDerivedAddress,
   getAddressEncoder,
   getBytesEncoder,
+  getU64Encoder,
   type Address,
 } from '@solana/kit'
 import { core, multiplayer } from './index'
@@ -48,6 +49,17 @@ export async function deriveMultiplayerGameAccountTaPda(gameAccount: Address): P
   const [addr] = await getProgramDerivedAddress({
     programAddress: multiplayer.MULTIPLAYER_PROGRAM_ADDRESS as Address,
     seeds: [getAddressEncoder().encode(gameAccount)],
+  })
+  return addr as Address
+}
+
+export async function deriveMultiplayerGamePda(gameSeed: bigint | number): Promise<Address> {
+  const [addr] = await getProgramDerivedAddress({
+    programAddress: multiplayer.MULTIPLAYER_PROGRAM_ADDRESS as Address,
+    seeds: [
+      getBytesEncoder().encode(ascii('GAME')),
+      getU64Encoder().encode(BigInt(gameSeed)),
+    ],
   })
   return addr as Address
 }

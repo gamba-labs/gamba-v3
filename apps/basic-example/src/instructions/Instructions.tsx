@@ -1,6 +1,7 @@
 import React from 'react'
 import { PlayGameDemo } from '../PlayGameDemo'
 import { JoinGameDemo } from '../JoinGameDemo'
+import { CreateGameDemo } from '../CreateGameDemo'
 
 type TabKey = 'singleplayer' | 'multiplayer' | 'referral'
 
@@ -74,6 +75,7 @@ export function Instructions() {
 
       {tab === 'multiplayer' && (
         <div style={{ display: 'grid', gap: 12 }}>
+          <CreateGameDemo />
           <JoinGameDemo />
         </div>
       )}
