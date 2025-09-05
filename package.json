@@ -1,0 +1,16 @@
+{
+  "private": true,
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev --no-cache --continue",
+    "clean": "turbo run clean && rm -rf node_modules",
+    "changeset": "changeset",
+    "version-packages": "changeset version"
+  },
+  "devDependencies": {
+    "@changesets/cli": "^2.26.2",
+    "turbo": "^1.13.3",
+    "typescript": "^5.9.2"
+  },
+  "packageManager": "pnpm@10.12.4"
+}
