@@ -1,11 +1,11 @@
 import React from 'react'
 import bs58 from 'bs58'
-import { core, instructions } from '@gamba/sdk'
-import { useWalletCtx } from './wallet/WalletContext'
+import { core, instructions, pdas } from '@gamba/sdk'
+import { useWalletCtx } from '../../wallet/WalletContext'
 import { useWalletAccountTransactionSendingSigner } from '@solana/react'
-import { useSendSmartTransaction } from './wallet/useSendSmartTransaction'
+import { useSendSmartTransaction } from '../../wallet/useSendSmartTransaction'
 import { type Base58EncodedBytes, type Address } from '@solana/kit'
-import { useRpc } from './rpc/RpcContext'
+import { useRpc } from '../../rpc/RpcContext'
 
 
 type PoolAccount = { address: string; data: ReturnType<typeof core.getPoolDecoder> extends infer D ? D extends { decode: (u8: Uint8Array) => infer T } ? T : never : never }
@@ -89,11 +89,10 @@ function PlayGameForm() {
   }
 
   return (
-    <div className="panel" style={{ marginTop: 16 }}>
-      <h3>Play Game (demo)</h3>
-      <div style={{ display: 'grid', gap: 8 }}>
-        <div>
-          <label>Pool (by underlying mint)</label>
+    <div className="grid gap-8">
+      <div className="form">
+        <div className="form-row">
+          <div className="form-label">Pool (by underlying mint)</div>
           <select value={selectedPool} onChange={(e) => setSelectedPool(e.target.value)}>
             {pools?.map((p) => (
               <option key={p.address} value={p.address}>{String(p.data.underlyingTokenMint)}</option>
@@ -101,45 +100,39 @@ function PlayGameForm() {
           </select>
         </div>
         {selected && (
-          <div style={{ display: 'grid', gap: 4, padding: 8, background: '#fafafa', borderRadius: 6 }}>
-            <div>Underlying mint: <code>{String(selected.data.underlyingTokenMint)}</code></div>
-            <div>Pool authority (info): <code>{String(selected.data.poolAuthority)}</code></div>
-            <div>Liquidity: {selected.data.liquidityCheckpoint.toString()}</div>
-            <div>Min wager: {selected.data.minWager.toString()}</div>
-            <div>Max payout bps: {selected.data.customMaxPayoutBps.toString()}</div>
-          </div>
+          <PoolInfo poolAddress={selected.address as Address} mint={selected.data.underlyingTokenMint as Address} />
         )}
-        <div>
-          <label>Creator address (optional)</label>
+        <div className="form-row">
+          <div className="form-label">Creator address (optional)</div>
           <input value={creatorOverride} onChange={(e) => setCreatorOverride(e.target.value)} />
         </div>
-        <div>
-          <label>Wager (lamports)</label>
+        <div className="form-row">
+          <div className="form-label">Wager (lamports)</div>
           <input value={wager} onChange={(e) => setWager(e.target.value)} />
         </div>
-        <div>
-          <label>Bet (comma-separated integers)</label>
+        <div className="form-row">
+          <div className="form-label">Bet (comma-separated integers)</div>
           <input value={bet} onChange={(e) => setBet(e.target.value)} />
         </div>
-        <div>
-          <label>Client seed</label>
+        <div className="form-row">
+          <div className="form-label">Client seed</div>
           <input value={clientSeed} onChange={(e) => setClientSeed(e.target.value)} />
         </div>
-        <div>
-          <label>Creator fee (bps)</label>
+        <div className="form-row">
+          <div className="form-label">Creator fee (bps)</div>
           <input value={creatorFeeBps} onChange={(e) => setCreatorFeeBps(e.target.value)} />
         </div>
-        <div>
-          <label>Jackpot fee (bps)</label>
+        <div className="form-row">
+          <div className="form-label">Jackpot fee (bps)</div>
           <input value={jackpotFeeBps} onChange={(e) => setJackpotFeeBps(e.target.value)} />
         </div>
-        <div>
-          <label>Metadata (string)</label>
+        <div className="form-row">
+          <div className="form-label">Metadata (string)</div>
           <input value={metadata} onChange={(e) => setMetadata(e.target.value)} />
         </div>
-        
       </div>
-      <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
+
+      <div className="flex-row gap-8 mt-12">
         <button onClick={async () => {
           if (!account) return
           if (!selected) return
@@ -166,12 +159,37 @@ function PlayGameForm() {
   )
 }
 
-export function PlayGameDemo() {
+export function PlayGame() {
   const { account } = useWalletCtx()
-  if (!account) return <div style={{ marginTop: 16 }}>Connect wallet to play.</div>
+  if (!account) return <div className="muted">Connect wallet to play.</div>
   return <PlayGameForm />
 }
 
 // Join multiplayer form moved to its own file
 
 
+
+function PoolInfo({ poolAddress, mint }: { poolAddress: Address; mint: Address }) {
+  const { rpc } = useRpc()
+  const [liquidity, setLiquidity] = React.useState<string>('…')
+
+  React.useEffect(() => {
+    ;(async () => {
+      try {
+        const ata = await pdas.derivePoolUnderlyingTokenAccountPda(poolAddress)
+        const bal = await rpc.getTokenAccountBalance(ata, { commitment: 'confirmed' }).send()
+        setLiquidity(String(bal?.value?.amount ?? '0'))
+      } catch (e) {
+        setLiquidity('0')
+      }
+    })()
+  }, [rpc, poolAddress, mint])
+
+  return (
+    <div className="grid" style={{ gap: 4, padding: 8, background: '#fafafa' }}>
+      <div>Underlying mint: <code>{String(mint)}</code></div>
+      <div>Pool authority (info): <code>{String(poolAddress)}</code></div>
+      <div>Liquidity: {liquidity}</div>
+    </div>
+  )
+}
