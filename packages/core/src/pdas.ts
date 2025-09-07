@@ -5,7 +5,7 @@ import {
   getU64Encoder,
   type Address,
 } from '@solana/kit'
-import { core, multiplayer } from './index'
+import { core, multiplayer, stakeVault, referral } from './index'
 
 export const TOKEN_PROGRAM_ID = 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA' as Address
 export const ASSOCIATED_TOKEN_PROGRAM_ID = 'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL' as Address
@@ -139,6 +139,43 @@ export async function deriveMetaplexMetadataPda(mint: Address): Promise<Address>
       getAddressEncoder().encode(METAPLEX_TOKEN_METADATA_PROGRAM_ID as Address),
       getAddressEncoder().encode(mint),
     ],
+  })
+  return addr as Address
+}
+
+export async function deriveStakeVaultStakeAccountPda(
+  vault: Address,
+  staker: Address,
+): Promise<Address> {
+  const [addr] = await getProgramDerivedAddress({
+    programAddress: stakeVault.STAKE_VAULT_PROGRAM_ADDRESS as Address,
+    seeds: [getAddressEncoder().encode(vault), getAddressEncoder().encode(staker)],
+  })
+  return addr as Address
+}
+
+export async function deriveStakeVaultVaultPda(
+  authority: Address,
+  vaultId: number | bigint,
+): Promise<Address> {
+  const [addr] = await getProgramDerivedAddress({
+    programAddress: stakeVault.STAKE_VAULT_PROGRAM_ADDRESS as Address,
+    seeds: [
+      getBytesEncoder().encode(new Uint8Array([118, 97, 117, 108, 116])), // "vault"
+      getAddressEncoder().encode(authority),
+      getU64Encoder().encode(BigInt(vaultId)),
+    ],
+  })
+  return addr as Address
+}
+
+export async function deriveReferralAccountPda(
+  creator: Address,
+  authority: Address,
+): Promise<Address> {
+  const [addr] = await getProgramDerivedAddress({
+    programAddress: referral.REFER_PROGRAM_PROGRAM_ADDRESS as Address,
+    seeds: [getAddressEncoder().encode(creator), getAddressEncoder().encode(authority)],
   })
   return addr as Address
 }

@@ -1,7 +1,6 @@
 import React from 'react'
 import {
   appendTransactionMessageInstructions,
-  createSolanaRpc,
   getBase58Decoder,
   pipe,
   setTransactionMessageFeePayerSigner,
@@ -12,6 +11,7 @@ import {
   type Instruction,
   type TransactionSendingSigner,
 } from '@solana/kit'
+import { useRpc } from '../rpc/RpcContext'
 
 type Options = {
   rpcUrl?: string
@@ -20,8 +20,8 @@ type Options = {
 }
 
 export function useSendSmartTransaction(signer: TransactionSendingSigner, options?: Options) {
+  const { rpc } = useRpc()
   const simulate = React.useCallback(async (instructions: Instruction<Address>[]) => {
-    const rpc = createSolanaRpc(options?.rpcUrl ?? 'https://elset-q80z7v-fast-mainnet.helius-rpc.com')
     if (!instructions?.length) throw new Error('No instructions provided')
     const { value: latestBlockhash } = await rpc.getLatestBlockhash().send()
     const message = pipe(
@@ -46,10 +46,9 @@ export function useSendSmartTransaction(signer: TransactionSendingSigner, option
       console.error('[sendSmartTransaction] simulate failed', e)
       throw e
     }
-  }, [options?.rpcUrl, signer])
+  }, [rpc, signer])
 
   const send = React.useCallback(async (instructions: Instruction<Address>[]) => {
-    const rpc = createSolanaRpc(options?.rpcUrl ?? 'https://elset-q80z7v-fast-mainnet.helius-rpc.com')
     try {
       if (!instructions?.length) throw new Error('No instructions provided')
 
@@ -85,7 +84,7 @@ export function useSendSmartTransaction(signer: TransactionSendingSigner, option
       console.error('[sendSmartTransaction] Failed', e)
       throw e
     }
-  }, [options?.rpcUrl, signer])
+  }, [rpc, signer])
 
   return { simulate, send }
 }

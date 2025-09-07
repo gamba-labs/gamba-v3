@@ -12,8 +12,13 @@ import { CreateGame } from './multiplayer/CreateGame'
 import { LeaveGame } from './multiplayer/LeaveGame'
 import { SelectWinners } from './multiplayer/SelectWinners'
 import { EditBet } from './multiplayer/EditBet'
+import { ConfigReferAccount } from './referral/ConfigReferAccount'
+import { CloseReferAccount } from './referral/CloseReferAccount'
+import { InitializeVault } from './stake-vault/InitializeVault'
+import { Deposit } from './stake-vault/Deposit'
+import { Withdraw } from './stake-vault/Withdraw'
 
-type TabKey = 'singleplayer' | 'multiplayer' | 'referral'
+type TabKey = 'singleplayer' | 'multiplayer' | 'referral' | 'stakevault'
 
 function TabButton({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
   return (
@@ -50,6 +55,9 @@ export function Instructions() {
         </div>
         <div>
           <TabButton active={tab === 'referral'} onClick={() => setTab('referral')}>Referral</TabButton>
+        </div>
+        <div>
+          <TabButton active={tab === 'stakevault'} onClick={() => setTab('stakevault')}>Stake Vault</TabButton>
         </div>
       </div>
 
@@ -103,7 +111,28 @@ export function Instructions() {
       )}
 
       {tab === 'referral' && (
-        <div className="muted">Referral instructions coming soon…</div>
+        <div style={{ display: 'grid', gap: 12 }}>
+          <InstructionCard title="Config Refer Account">
+            <ConfigReferAccount />
+          </InstructionCard>
+          <InstructionCard title="Close Refer Account">
+            <CloseReferAccount />
+          </InstructionCard>
+        </div>
+      )}
+
+      {tab === 'stakevault' && (
+        <div style={{ display: 'grid', gap: 12 }}>
+          <InstructionCard title="Initialize Vault">
+            <InitializeVault />
+          </InstructionCard>
+          <InstructionCard title="Deposit">
+            <Deposit />
+          </InstructionCard>
+          <InstructionCard title="Withdraw">
+            <Withdraw />
+          </InstructionCard>
+        </div>
       )}
     </div>
   )

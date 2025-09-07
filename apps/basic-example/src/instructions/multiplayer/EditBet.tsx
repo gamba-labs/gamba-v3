@@ -21,6 +21,7 @@ function Form() {
   const [wager, setWager] = React.useState<string>('0')
   const [team, setTeam] = React.useState<string>('0')
   const [creator, setCreator] = React.useState<string>('')
+  const [creatorFeeBps, setCreatorFeeBps] = React.useState<string>('0')
 
   const buildIxs = React.useCallback(async () => {
     const [leaveIx, joinIx] = await instructions.multiplayer.buildEditBetInstructions({
@@ -30,9 +31,10 @@ function Form() {
       wager: Number(wager || '0'),
       team: Number(team || '0'),
       creatorAddress: (creator.trim() ? (creator as unknown as Address) : undefined) as Address,
+      creatorFeeBps: Number(creatorFeeBps || '0'),
     })
     return [leaveIx, joinIx]
-  }, [signer, gameAccount, mint, wager, team, creator])
+  }, [signer, gameAccount, mint, wager, team, creator, creatorFeeBps])
 
   const onSim = async () => {
     const ixs = await buildIxs()
@@ -69,6 +71,10 @@ function Form() {
         <div className="form-row">
           <div className="form-label">Creator/referrer (optional)</div>
           <input value={creator} onChange={(e) => setCreator(e.target.value)} />
+        </div>
+        <div className="form-row">
+          <div className="form-label">Creator fee (bps, optional)</div>
+          <input value={creatorFeeBps} onChange={(e) => setCreatorFeeBps(e.target.value)} />
         </div>
       </div>
       <div className="flex-row gap-8 mt-12">

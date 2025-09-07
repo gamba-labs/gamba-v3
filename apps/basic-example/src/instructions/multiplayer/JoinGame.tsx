@@ -22,6 +22,7 @@ function JoinGameForm() {
   const [creator, setCreator] = React.useState<string>('')
   const [wager, setWager] = React.useState<string>('0')
   const [team, setTeam] = React.useState<string>('0')
+  const [creatorFeeBps, setCreatorFeeBps] = React.useState<string>('0')
 
   const buildIx = React.useCallback(async () => {
     const creatorAddr = (creator.trim() || account!.address) as unknown as Address
@@ -32,9 +33,10 @@ function JoinGameForm() {
       creatorAddress: creatorAddr as Address,
       wager: Number(wager || '0'),
       team: Number(team || '0'),
+      creatorFeeBps: Number(creatorFeeBps || '0'),
     })
     return ix
-  }, [gameAccount, mint, creator, signer, wager, team])
+  }, [gameAccount, mint, creator, signer, wager, team, creatorFeeBps])
 
   const onSim = async () => {
     const ix = await buildIx()
@@ -63,6 +65,10 @@ function JoinGameForm() {
         <div className="form-row">
           <div className="form-label">Creator/referrer (optional)</div>
           <input value={creator} onChange={(e) => setCreator(e.target.value)} />
+        </div>
+        <div className="form-row">
+          <div className="form-label">Creator fee (bps, optional)</div>
+          <input value={creatorFeeBps} onChange={(e) => setCreatorFeeBps(e.target.value)} />
         </div>
         <div className="form-row">
           <div className="form-label">Wager (lamports)</div>

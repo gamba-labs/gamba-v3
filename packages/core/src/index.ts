@@ -1,6 +1,7 @@
 export * as core from './codama/core';
 export * as multiplayer from './codama/multiplayer';
 export * as referral from './codama/referral';
+export * as stakeVault from './codama/stake-vault';
 
 export * as pdas from './pdas';
 
