@@ -1,0 +1,33 @@
+{
+  "name": "@gamba/platform-template",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview --port 5174"
+  },
+  "dependencies": {
+    "@gamba/sdk": "workspace:*",
+    "@solana/kit": "^3.0.0",
+    "@wallet-standard/app": "^1.0.0",
+    "@wallet-standard/features": "^1.0.0",
+    "@wallet-standard/react": "^1.0.1",
+    "@solana/react": "^3.0.2",
+    "framer-motion": "^11.3.30",
+    "styled-components": "^6.1.8",
+    "bs58": "^6.0.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@vitejs/plugin-react-swc": "^3.7.0",
+    "typescript": "^5.9.2",
+    "vite": "^7.1.5"
+  }
+}
+
+
