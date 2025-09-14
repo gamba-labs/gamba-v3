@@ -22,9 +22,7 @@ export function Home({ onOpenGame }: { onOpenGame: (id: string) => void }) {
         ))}
       </GamesGrid>
 
-      <RecentList>
-        <div style={{ opacity: 0.8 }}>Recent plays will appear here.</div>
-      </RecentList>
+      <RecentList />
     </div>
   )
 }

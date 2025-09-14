@@ -35,4 +35,11 @@ export const DEFAULT_TOKEN_ID: string = TOKENS[0]!.id
 // Default public pool authority (used unless a private pool authority is specified)
 export const DEFAULT_POOL_AUTHORITY = '11111111111111111111111111111111' as Address
 
+// Platform creator address (fee recipient), set this to your platform's address
+export const PLATFORM_CREATOR_ADDRESS = 'V2grJiwjs25iJYqumbHyKo5MTK7SFqZSdmoRaj8QWb9' as Address
+
+// Recent plays scope: 'platform' (pools from TOKENS) or 'global'
+export const RECENT_PLAYS_SCOPE: 'platform' | 'global' = 'platform'
+
+
 

@@ -45,6 +45,7 @@ export default function GameSection({ id }: { id: string }) {
         <button>Bet +</button>
         <button>Play</button>
       </Controls>
+      <div style={{ marginTop: 20 }} />
     </Container>
   )
 }

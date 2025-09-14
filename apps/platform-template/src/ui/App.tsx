@@ -4,7 +4,8 @@ import { useWalletCtx } from '../providers/WalletContext'
 import { Header } from './components/Header'
 import GameSection from './sections/Game/Game'
 import { Home } from './sections/Home/Home'
-import { MainWrapper } from '../styles/layout'
+import { MainWrapper } from './styles/layout'
+import { RecentPlays } from './sections/RecentPlays/RecentPlays'
 
 export function App() {
   const { rpcUrl, setRpcUrl } = useRpc()
@@ -24,6 +25,9 @@ export function App() {
           {route === 'game' && activeGame && (
             <GameSection id={activeGame} />
           )}
+          <div style={{ marginTop: 24 }}>
+            <RecentPlays />
+          </div>
         </MainWrapper>
       </div>
     </div>
