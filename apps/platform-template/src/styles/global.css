@@ -1,24 +1,34 @@
 :root {
-  --background-color: #0b0b0e;
-  --text-color: #ffffff;
-  --gamba-ui-primary-color: #9564ff;
+  /*
+   * THEME PRIMER — change these first for a quick rebrand
+   */
+  --background-color: #0b0b0e;  /* page background */
+  --text-color: #ffffff;        /* base text color */
+  --brand-color: #9564ff;       /* primary accent color */
+  --radius: 10px;               /* global border radius */
 
-  --gamba-ui-border-radius: 10px;
+  /* Expose short-hands used across components */
+  --bg: var(--background-color);
+  --fg: var(--text-color);
+
+  /*
+   * Gamba UI tokens — mapped to your theme
+   * If you swap UI kits later, keep these mappings for compatibility
+   */
+  --gamba-ui-primary-color: var(--brand-color);
+  --gamba-ui-border-radius: var(--radius);
 
   --gamba-ui-button-default-background: #0e0e16;
   --gamba-ui-button-default-background-hover: #11111d;
-  --gamba-ui-button-default-color: white;
+  --gamba-ui-button-default-color: #ffffff;
 
-  --gamba-ui-button-main-background: #8851ff;
-  --gamba-ui-button-main-color: white;
-  --gamba-ui-button-main-background-hover: #9564ff;
+  --gamba-ui-button-main-background: var(--brand-color);
+  --gamba-ui-button-main-color: #ffffff;
+  --gamba-ui-button-main-background-hover: #9f73ff;
 
   --gamba-ui-input-background: #0e0e16;
   --gamba-ui-input-color: #ffffff;
   --gamba-ui-input-background-hover: #11111d;
-
-  --bg: var(--background-color);
-  --fg: var(--text-color);
 }
 
 * { box-sizing: border-box; }
@@ -33,8 +43,8 @@ body, input, button, textarea, pre {
 h1, h2 { margin: 0; }
 
 body {
-  background: var(--background-color);
-  color: var(--text-color);
+  background: var(--bg);
+  color: var(--fg);
   cursor: default;
   margin: 0;
   overflow-y: scroll;

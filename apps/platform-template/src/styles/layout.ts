@@ -1,5 +1,6 @@
 import styled from 'styled-components'
 
+// Primary page container. Adjust widths/padding here to change overall layout.
 export const MainWrapper = styled.div`
   position: relative;
   width: 100%;
@@ -21,6 +22,7 @@ export const MainWrapper = styled.div`
   }
 `
 
+// Container for Terms-of-Service or any long scrollable legal text.
 export const TosWrapper = styled.div`
   position: relative;
   &:after {

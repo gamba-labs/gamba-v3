@@ -22,7 +22,7 @@ export function App() {
             <Home onOpenGame={(id) => { setActiveGame(id); setRoute('game') }} />
           )}
           {route === 'game' && activeGame && (
-            <GameSection />
+            <GameSection id={activeGame} />
           )}
         </MainWrapper>
       </div>

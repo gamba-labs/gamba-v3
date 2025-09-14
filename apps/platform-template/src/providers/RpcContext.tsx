@@ -9,7 +9,7 @@ type RpcContextType = {
 
 const RpcContext = React.createContext<RpcContextType | undefined>(undefined)
 
-const DEFAULT_URL = (import.meta as any).env?.VITE_SOLANA_RPC_URL || 'https://api.mainnet-beta.solana.com'
+const DEFAULT_URL = (import.meta as any).env?.RPC_URL || 'https://api.mainnet-beta.solana.com'
 
 export function RpcProvider({ children }: { children: React.ReactNode }) {
   const [rpcUrl, setRpcUrlState] = React.useState<string>(() => {
