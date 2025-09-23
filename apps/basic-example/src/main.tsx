@@ -4,6 +4,7 @@ import { App } from './App'
 import { WalletProvider } from './wallet/WalletContext'
 import { RpcProvider } from './rpc/RpcContext'
 import './styles/global.css'
+import './styles/LiveGames.css'
 
 const root = createRoot(document.getElementById('root')!)
 root.render(

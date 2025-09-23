@@ -103,48 +103,48 @@ export function RecentGamesList() {
   React.useEffect(() => { load() }, [load])
 
   return (
-    <div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-        <h3 style={{ margin: 0, fontSize: 16 }}>Recent Games</h3>
-        <button onClick={load} disabled={loading} style={{ padding: '4px 8px' }}>{loading ? 'Loading…' : 'Reload'}</button>
+    <div className="games-list">
+      <div className="games-header">
+        <h3>Recent Games</h3>
+        <button onClick={load} disabled={loading} className="btn-small">{loading ? 'Loading…' : 'Reload'}</button>
       </div>
-      <div style={{ height: 360, overflowY: 'auto' }}>
-        {err && <div className="panel" style={{ color: 'crimson', marginTop: 8, padding: 8, fontSize: 13 }}>Error: {err}</div>}
+      <div className="games-content">
+        {err && <div className="panel games-error">Error: {err}</div>}
         {!err && events.length === 0 && (
-          <div className="panel" style={{ marginTop: 8, padding: 8, fontSize: 13 }}>No recent games.</div>
+          <div className="panel games-empty">No recent games.</div>
         )}
         {events.length > 0 && (
-          <div style={{ display: 'grid', gap: 8 }}>
+          <div className="games-grid">
             {events.map(({ e, sig, time }) => (
-              <div key={sig} className="panel" style={{ padding: 8, display: 'grid', gap: 6, fontSize: 13 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <code style={{ fontSize: 12 }}>{sig.slice(0, 12)}…</code>
-                  <span className="muted" style={{ fontSize: 12 }}>{time ? new Date(time * 1000).toLocaleString() : ''}</span>
+              <div key={sig} className="panel recent-game-item">
+                <div className="recent-game-header">
+                  <code className="recent-game-signature">{sig.slice(0, 12)}…</code>
+                  <span className="muted recent-game-time">{time ? new Date(time * 1000).toLocaleString() : ''}</span>
                 </div>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0,1fr))', gap: 6 }}>
-                  <div>
-                    <div className="muted">User</div>
-                    <div style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}><code style={{ fontSize: 12 }}>{String(e.user)}</code></div>
+                <div className="recent-game-info-grid">
+                  <div className="game-info-item">
+                    <div className="muted game-info-label">User</div>
+                    <div className="game-info-value" style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}><code className="game-info-code">{String(e.user)}</code></div>
                   </div>
-                  <div>
-                    <div className="muted">Pool</div>
-                    <div style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}><code style={{ fontSize: 12 }}>{String(e.pool)}</code></div>
+                  <div className="game-info-item">
+                    <div className="muted game-info-label">Pool</div>
+                    <div className="game-info-value" style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}><code className="game-info-code">{String(e.pool)}</code></div>
                   </div>
-                  <div>
-                    <div className="muted">Token</div>
-                    <div style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}><code style={{ fontSize: 12 }}>{String(e.tokenMint)}</code></div>
+                  <div className="game-info-item">
+                    <div className="muted game-info-label">Token</div>
+                    <div className="game-info-value" style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}><code className="game-info-code">{String(e.tokenMint)}</code></div>
                   </div>
-                  <div>
-                    <div className="muted">Wager</div>
-                    <div>{e.wager.toString()}</div>
+                  <div className="game-info-item">
+                    <div className="muted game-info-label">Wager</div>
+                    <div className="game-info-value">{e.wager.toString()}</div>
                   </div>
-                  <div>
-                    <div className="muted">Payout</div>
-                    <div>{e.payout.toString()}</div>
+                  <div className="game-info-item">
+                    <div className="muted game-info-label">Payout</div>
+                    <div className="game-info-value">{e.payout.toString()}</div>
                   </div>
-                  <div>
-                    <div className="muted">Multiplier (bps)</div>
-                    <div>{e.multiplierBps}</div>
+                  <div className="game-info-item">
+                    <div className="muted game-info-label">Multiplier (bps)</div>
+                    <div className="game-info-value">{e.multiplierBps}</div>
                   </div>
                 </div>
               </div>

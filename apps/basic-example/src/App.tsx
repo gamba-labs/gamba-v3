@@ -1,6 +1,6 @@
 import React from 'react'
-import { GamesList } from './game'
-import { RecentGamesList } from './recentgames'
+import { GamesList } from './LiveGames'
+import { RecentGamesList } from './RecentGames'
 import { ConnectWallet } from './wallet/ConnectWallet'
 import { useWalletCtx } from './wallet/WalletContext'
 import { Instructions } from './instructions/Instructions'

@@ -1,0 +1,110 @@
+/* Games List Styles */
+.games-list {
+  width: 100%;
+}
+
+.games-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.games-header h3 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.games-content {
+  height: 360px;
+  overflow-y: auto;
+}
+
+.games-error {
+  color: crimson;
+  margin-top: 12px;
+}
+
+.games-empty {
+  margin-top: 8px;
+  padding: 8px;
+  font-size: 13px;
+}
+
+.games-grid {
+  display: grid;
+  gap: 8px;
+}
+
+.game-item {
+  display: grid;
+  gap: 6px;
+  padding: 8px;
+}
+
+.game-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.game-item-address {
+  font-size: 12px;
+}
+
+.game-item-timestamp {
+  font-size: 12px;
+}
+
+.game-info-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+  font-size: 13px;
+}
+
+.game-info-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.game-info-label {
+  color: #6b7280;
+  font-size: 12px;
+}
+
+.game-info-value {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.game-info-code {
+  font-size: 12px;
+}
+
+/* Recent Games specific styles */
+.recent-game-item {
+  padding: 8px;
+  display: grid;
+  gap: 6px;
+  font-size: 13px;
+}
+
+.recent-game-header {
+  display: flex;
+  justify-content: space-between;
+}
+
+.recent-game-signature {
+  font-size: 12px;
+}
+
+.recent-game-time {
+  font-size: 12px;
+}
+
+.recent-game-info-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
