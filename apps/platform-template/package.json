@@ -11,10 +11,7 @@
   "dependencies": {
     "@gamba/sdk": "workspace:*",
     "@solana/kit": "^3.0.0",
-    "@wallet-standard/app": "^1.0.0",
-    "@wallet-standard/features": "^1.0.0",
-    "@wallet-standard/react": "^1.0.1",
-    "@solana/react": "^3.0.2",
+    "@solana/connector": "^0.2.0",
     "framer-motion": "^11.3.30",
     "styled-components": "^6.1.8",
     "bs58": "^6.0.0",
@@ -29,5 +26,3 @@
     "vite": "^7.1.5"
   }
 }
-
-

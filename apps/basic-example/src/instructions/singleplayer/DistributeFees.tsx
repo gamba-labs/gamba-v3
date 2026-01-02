@@ -1,21 +1,18 @@
 import React from 'react'
-import { useWalletCtx } from '../../wallet/WalletContext'
-import { useWalletAccountTransactionSendingSigner } from '@solana/react'
+import { useConnector } from '@solana/connector'
 import { useSendSmartTransaction } from '../../wallet/useSendSmartTransaction'
 import { core, pdas, instructions } from '@gamba/sdk'
 import type { Address } from '@solana/kit'
 import { useRpc } from '../../rpc/RpcContext'
 
 export function DistributeFees() {
-  const { account } = useWalletCtx()
-  if (!account) return <div className="muted">Connect wallet to distribute fees.</div>
+  const { isConnected } = useConnector()
+  if (!isConnected) return <div className="muted">Connect wallet to distribute fees.</div>
   return <Form />
 }
 
 function Form() {
-  const { account } = useWalletCtx()
-  const signer = useWalletAccountTransactionSendingSigner(account!, 'solana:mainnet')
-  const { simulate, send } = useSendSmartTransaction(signer)
+  const { simulate, send, signer } = useSendSmartTransaction()
   const { rpc } = useRpc()
 
   const [underlyingMint, setUnderlyingMint] = React.useState<string>('')

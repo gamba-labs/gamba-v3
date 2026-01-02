@@ -1,6 +1,5 @@
 import React from 'react'
-import { useWallets, useDisconnect } from '@wallet-standard/react'
-import { useWalletCtx } from '../../providers/WalletContext'
+import { useConnector } from '@solana/connector'
 import { ConnectModal } from './ConnectModal'
 import styled from 'styled-components'
 import { useRpc } from '../../providers/RpcContext'
@@ -16,23 +15,23 @@ const Btn = styled.button`
 `
 
 function ConnectedSummary() {
-  const { account, connectedWallet, setConnectedWallet } = useWalletCtx()
-  const wallets = useWallets()
-  const active = React.useMemo(
-    () => wallets.find((w) => w.name === connectedWallet!.wallet.name),
-    [wallets, connectedWallet]
-  )
-  const [isDisconnecting, disconnect] = useDisconnect(active || (connectedWallet!.wallet as any))
-  const short = `${account!.address.slice(0, 4)}…${account!.address.slice(-4)}`
-  const [open, setOpen] = React.useState(false)
+  const { account, disconnectWallet } = useConnector()
   const { rpcUrl, setRpcUrl } = useRpc()
-  const onDisconnect = async () => {
+  const [open, setOpen] = React.useState(false)
+  const [isDisconnecting, setIsDisconnecting] = React.useState(false)
+  
+  const address = account ? String((account as any).address ?? account) : ''
+  const short = address ? `${address.slice(0, 4)}…${address.slice(-4)}` : ''
+
+  const handleDisconnect = async () => {
+    setIsDisconnecting(true)
     try {
-      await disconnect()
+      await disconnectWallet()
     } finally {
-      setConnectedWallet(null)
+      setIsDisconnecting(false)
     }
   }
+
   return (
     <div style={{ position: 'relative' }}>
       <Btn onClick={() => setOpen((v) => !v)} aria-haspopup="menu" aria-expanded={open}>
@@ -54,7 +53,13 @@ function ConnectedSummary() {
               </div>
             </div>
             <hr style={{ border: 'none', borderTop: '1px solid rgba(125,125,140,0.25)', margin: '4px 0' }} />
-            <button style={{ width: '100%', padding: '8px 10px', background: 'transparent', color: 'inherit', border: 'none', textAlign: 'left', cursor: 'pointer' }} onClick={onDisconnect} disabled={isDisconnecting}>Disconnect</button>
+            <button 
+              style={{ width: '100%', padding: '8px 10px', background: 'transparent', color: 'inherit', border: 'none', textAlign: 'left', cursor: 'pointer' }} 
+              onClick={handleDisconnect} 
+              disabled={isDisconnecting}
+            >
+              {isDisconnecting ? 'Disconnecting…' : 'Disconnect'}
+            </button>
           </div>
         </div>
       )}
@@ -63,9 +68,11 @@ function ConnectedSummary() {
 }
 
 export function ConnectWallet() {
-  const { isConnected, account } = useWalletCtx()
+  const { isConnected } = useConnector()
   const [show, setShow] = React.useState(false)
-  if (isConnected && account) return <ConnectedSummary />
+
+  if (isConnected) return <ConnectedSummary />
+  
   return (
     <>
       <Btn onClick={() => setShow(true)}>Connect</Btn>
@@ -73,5 +80,3 @@ export function ConnectWallet() {
     </>
   )
 }
-
-

@@ -2,14 +2,14 @@ import React from 'react'
 import { GamesList } from './LiveGames'
 import { RecentGamesList } from './RecentGames'
 import { ConnectWallet } from './wallet/ConnectWallet'
-import { useWalletCtx } from './wallet/WalletContext'
+import { useConnector } from '@solana/connector'
 import { Instructions } from './instructions/Instructions'
 import { useRpc } from './rpc/RpcContext'
 
 export function App() {
-  const { account, isConnected } = useWalletCtx()
+  const { account, isConnected } = useConnector()
   const { rpcUrl, setRpcUrl } = useRpc()
-  const walletLabel = isConnected && account ? `${account.address.slice(0,4)}…${account.address.slice(-4)}` : 'Connect'
+  const walletLabel = isConnected && account ? `${account.slice(0,4)}…${account.slice(-4)}` : 'Connect'
   const [rpcOpen, setRpcOpen] = React.useState(false)
   const [walletOpen, setWalletOpen] = React.useState(false)
   
@@ -34,7 +34,7 @@ export function App() {
       <div className="container">
         <h1>Gamba SDK Basic Example</h1>
         <div className="muted" style={{ marginBottom: 12 }}>
-          {isConnected ? `Connected: ${account?.address}` : 'Not connected'}
+          {isConnected ? `Connected: ${account}` : 'Not connected'}
         </div>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, alignItems: 'start' }}>
         <div>
@@ -52,5 +52,3 @@ export function App() {
     </div>
   )
 }
-
-

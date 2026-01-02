@@ -11,8 +11,7 @@
   "dependencies": {
     "@gamba/sdk": "workspace:*",
     "@solana/kit": "^3.0.0",
-    "@wallet-standard/react": "^1.0.1",
-    "@solana/react": "^3.0.2",
+    "@solana/connector": "^0.2.0",
     "bs58": "^6.0.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"

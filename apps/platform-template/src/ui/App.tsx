@@ -1,6 +1,6 @@
 import React from 'react'
 import { useRpc } from '../providers/RpcContext'
-import { useWalletCtx } from '../providers/WalletContext'
+import { useConnector } from '@solana/connector'
 import { Header } from './components/Header'
 import GameSection from './sections/Game/Game'
 import { Home } from './sections/Home/Home'
@@ -9,7 +9,7 @@ import { RecentPlays } from './sections/RecentPlays/RecentPlays'
 
 export function App() {
   const { rpcUrl, setRpcUrl } = useRpc()
-  const { isConnected } = useWalletCtx()
+  const { isConnected } = useConnector()
 
   const [route, setRoute] = React.useState<'home' | 'game'>('home')
   const [activeGame, setActiveGame] = React.useState<string | null>(null)
@@ -33,5 +33,3 @@ export function App() {
     </div>
   )
 }
-
-

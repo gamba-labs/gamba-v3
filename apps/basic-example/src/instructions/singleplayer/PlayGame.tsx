@@ -1,8 +1,7 @@
 import React from 'react'
 import bs58 from 'bs58'
 import { core, instructions, pdas } from '@gamba/sdk'
-import { useWalletCtx } from '../../wallet/WalletContext'
-import { useWalletAccountTransactionSendingSigner } from '@solana/react'
+import { useConnector } from '@solana/connector'
 import { useSendSmartTransaction } from '../../wallet/useSendSmartTransaction'
 import { type Base58EncodedBytes, type Address } from '@solana/kit'
 import { useRpc } from '../../rpc/RpcContext'
@@ -11,9 +10,8 @@ import { useRpc } from '../../rpc/RpcContext'
 type PoolAccount = { address: string; data: ReturnType<typeof core.getPoolDecoder> extends infer D ? D extends { decode: (u8: Uint8Array) => infer T } ? T : never : never }
 
 function PlayGameForm() {
-  const { account } = useWalletCtx()
-  const signer = useWalletAccountTransactionSendingSigner(account!, 'solana:mainnet')
-  const { simulate, send } = useSendSmartTransaction(signer)
+  const { account } = useConnector()
+  const { simulate, send, signer } = useSendSmartTransaction()
 
   const [pools, setPools] = React.useState<PoolAccount[] | null>(null)
   const [selectedPool, setSelectedPool] = React.useState<string>('')
@@ -100,7 +98,11 @@ function PlayGameForm() {
           </select>
         </div>
         {selected && (
-          <PoolInfo poolAddress={selected.address as Address} mint={selected.data.underlyingTokenMint as Address} />
+          <PoolInfo 
+            poolAddress={selected.address as Address} 
+            mint={selected.data.underlyingTokenMint as Address} 
+            poolAuthority={selected.data.poolAuthority as Address}
+          />
         )}
         <div className="form-row">
           <div className="form-label">Creator address (optional)</div>
@@ -160,8 +162,8 @@ function PlayGameForm() {
 }
 
 export function PlayGame() {
-  const { account } = useWalletCtx()
-  if (!account) return <div className="muted">Connect wallet to play.</div>
+  const { isConnected } = useConnector()
+  if (!isConnected) return <div className="muted">Connect wallet to play.</div>
   return <PlayGameForm />
 }
 
@@ -169,7 +171,7 @@ export function PlayGame() {
 
 
 
-function PoolInfo({ poolAddress, mint }: { poolAddress: Address; mint: Address }) {
+function PoolInfo({ poolAddress, mint, poolAuthority }: { poolAddress: Address; mint: Address; poolAuthority: Address }) {
   const { rpc } = useRpc()
   const [liquidity, setLiquidity] = React.useState<string>('…')
 
@@ -188,7 +190,8 @@ function PoolInfo({ poolAddress, mint }: { poolAddress: Address; mint: Address }
   return (
     <div className="grid" style={{ gap: 4, padding: 8, background: '#fafafa' }}>
       <div>Underlying mint: <code>{String(mint)}</code></div>
-      <div>Pool authority (info): <code>{String(poolAddress)}</code></div>
+      <div>Pool address: <code>{String(poolAddress)}</code></div>
+      <div>Pool authority: <code>{String(poolAuthority)}</code></div>
       <div>Liquidity: {liquidity}</div>
     </div>
   )

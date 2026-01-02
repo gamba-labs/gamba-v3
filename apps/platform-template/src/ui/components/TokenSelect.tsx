@@ -2,7 +2,7 @@ import React from 'react'
 import styled from 'styled-components'
 import { useToken } from '../../providers/TokenContext'
 import { useRpc } from '../../providers/RpcContext'
-import { useWalletCtx } from '../../providers/WalletContext'
+import { useConnector } from '@solana/connector'
 import { TOKENS } from '../../config/constants'
 import { pdas } from '@gamba/sdk'
 import type { Address } from '@solana/kit'
@@ -21,7 +21,7 @@ export function TokenSelect() {
   const { tokens, selected, setSelected } = useToken()
   const [open, setOpen] = React.useState(false)
   const { rpc } = useRpc()
-  const { account } = useWalletCtx()
+  const { account } = useConnector()
   const [balances, setBalances] = React.useState<Record<string, string>>({})
 
   React.useEffect(() => {
@@ -34,13 +34,14 @@ export function TokenSelect() {
           if (!cfg) return [t.id, '0'] as const
           try {
             const isSol = t.id === 'sol' || String(cfg.mint) === 'So11111111111111111111111111111111111111112'
+            const accountAddress = String((account as any).address ?? account) as Address
             if (isSol) {
-              const res = await rpc.getBalance(account.address as Address).send()
+              const res = await rpc.getBalance(accountAddress).send()
               const lamports = BigInt((res as any)?.value ?? res ?? 0)
               const ui = Number(lamports) / 1e9
               return [t.id, ui.toFixed(4)] as const
             } else {
-              const ata = await pdas.deriveAta(account.address as Address, cfg.mint as Address)
+              const ata = await pdas.deriveAta(accountAddress, cfg.mint as Address)
               const res = await rpc.getTokenAccountBalance(ata).send()
               const raw = (res?.value?.amount ?? '0') as string
               const uiStr = (res?.value?.uiAmountString as string | undefined)
@@ -83,5 +84,3 @@ export function TokenSelect() {
     </div>
   )
 }
-
-

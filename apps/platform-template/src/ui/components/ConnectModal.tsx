@@ -1,8 +1,7 @@
 import React from 'react'
 import styled from 'styled-components'
-import { useWallets, useConnect, type UiWallet } from '@wallet-standard/react'
+import { useConnector } from '@solana/connector'
 import { Modal } from './Modal'
-import { useWalletCtx } from '../../providers/WalletContext'
 
 const List = styled.div`
   display: grid;
@@ -22,46 +21,42 @@ const Item = styled.button`
   justify-content: space-between;
 `
 
-function WalletItem({ wallet, onDone }: { wallet: UiWallet; onDone: () => void }) {
-  const { setConnectedWallet } = useWalletCtx()
-  const [isConnecting, connect] = useConnect(wallet)
-  const onClick = async () => {
+export function ConnectModal({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const { connectors, connectWallet, isConnecting } = useConnector()
+
+  const handleConnect = async (connectorId: any) => {
     try {
-      const accounts = await connect()
-      const first = accounts?.[0]
-      if (first) {
-        setConnectedWallet({ account: first, wallet })
-        onDone()
-      }
+      await connectWallet(connectorId)
+      onClose()
     } catch (e) {
       console.error('connect failed', e)
     }
   }
-  return (
-    <Item onClick={onClick} disabled={isConnecting}>
-      <span>{wallet.name}</span>
-      <span style={{ opacity: 0.7 }}>{isConnecting ? 'Connecting…' : 'Connect'}</span>
-    </Item>
-  )
-}
 
-export function ConnectModal({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const wallets = useWallets()
-  const solanaWallets = wallets.filter((w) => w.chains.some((c) => c.startsWith('solana:')))
   return (
     <Modal open={open} onClose={onClose}>
       <h3 style={{ marginTop: 0, marginBottom: 12 }}>Connect a wallet</h3>
-      {!solanaWallets.length ? (
+      {connectors.length === 0 ? (
         <div>No wallets found. Install Phantom or Solflare.</div>
       ) : (
         <List>
-          {solanaWallets.map((w) => (
-            <WalletItem key={w.name} wallet={w} onDone={onClose} />
+          {connectors.map((connector) => (
+            <Item 
+              key={connector.id} 
+              onClick={() => handleConnect(connector.id)} 
+              disabled={isConnecting || !connector.ready}
+            >
+              <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                {connector.icon && <img src={connector.icon} alt={connector.name} width={24} height={24} />}
+                {connector.name}
+              </span>
+              <span style={{ opacity: 0.7 }}>
+                {isConnecting ? 'Connecting…' : connector.ready ? 'Connect' : 'Not installed'}
+              </span>
+            </Item>
           ))}
         </List>
       )}
     </Modal>
   )
 }
-
-

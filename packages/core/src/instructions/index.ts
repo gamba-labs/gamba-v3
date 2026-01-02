@@ -2,4 +2,5 @@
 export * as singleplayer from './singleplayer/index'
 export * as multiplayer from './multiplayer/index'
 export * as stakeVault from './stake-vault/index'
+export * as referral from './referral/index'
 

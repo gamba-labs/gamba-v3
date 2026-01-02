@@ -1,20 +1,17 @@
 import React from 'react'
-import { useWalletCtx } from '../../wallet/WalletContext'
-import { useWalletAccountTransactionSendingSigner } from '@solana/react'
+import { useConnector } from '@solana/connector'
 import { useSendSmartTransaction } from '../../wallet/useSendSmartTransaction'
 import { instructions } from '@gamba/sdk'
 import type { Address } from '@solana/kit'
 
 export function InitializeVault() {
-  const { account } = useWalletCtx()
-  if (!account) return <div className="muted">Connect wallet to initialize a vault.</div>
+  const { isConnected } = useConnector()
+  if (!isConnected) return <div className="muted">Connect wallet to initialize a vault.</div>
   return <Form />
 }
 
 function Form() {
-  const { account } = useWalletCtx()
-  const signer = useWalletAccountTransactionSendingSigner(account!, 'solana:mainnet')
-  const { simulate, send } = useSendSmartTransaction(signer)
+  const { simulate, send, signer } = useSendSmartTransaction()
 
   const [tokenMint, setTokenMint] = React.useState<string>('')
   const [vaultId, setVaultId] = React.useState<string>('0')

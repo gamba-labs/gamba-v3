@@ -1,6 +1,5 @@
 import React from 'react'
-import { useWalletCtx } from '../../wallet/WalletContext'
-import { useWalletAccountTransactionSendingSigner } from '@solana/react'
+import { useConnector } from '@solana/connector'
 import { useSendSmartTransaction } from '../../wallet/useSendSmartTransaction'
 import { instructions } from '@gamba/sdk'
 import type { Address } from '@solana/kit'
@@ -8,15 +7,13 @@ import type { Address } from '@solana/kit'
 const WSOL = 'So11111111111111111111111111111111111111112'
 
 export function CreateGame() {
-  const { account } = useWalletCtx()
-  if (!account) return <div className="muted">Connect wallet to create a multiplayer game.</div>
+  const { isConnected } = useConnector()
+  if (!isConnected) return <div className="muted">Connect wallet to create a multiplayer game.</div>
   return <CreateGameForm />
 }
 
 function CreateGameForm() {
-  const { account } = useWalletCtx()
-  const signer = useWalletAccountTransactionSendingSigner(account!, 'solana:mainnet')
-  const { simulate, send } = useSendSmartTransaction(signer)
+  const { simulate, send, signer } = useSendSmartTransaction()
 
   const [mint, setMint] = React.useState<string>(WSOL)
   const [maxPlayers, setMaxPlayers] = React.useState<string>('10')

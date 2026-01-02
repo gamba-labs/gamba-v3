@@ -1,9 +1,8 @@
 import React from 'react'
 import { useRpc } from '../providers/RpcContext'
-import { useWalletCtx } from '../providers/WalletContext'
+import { useConnector } from '@solana/connector'
 import { instructions } from '@gamba/sdk'
 import { useToken } from '../providers/TokenContext'
-import { useWalletAccountTransactionSendingSigner } from '@solana/react'
 import type { Address } from '@solana/kit'
 import { useSendSmartTransaction } from './useSendSmartTransaction'
 
@@ -18,14 +17,13 @@ type PlayOptions = {
 
 export function useGambaPlay() {
   const { rpc } = useRpc()
-  const { account } = useWalletCtx()
+  const { isConnected } = useConnector()
   const { selectedPool } = useToken()
-  const signer = account ? useWalletAccountTransactionSendingSigner(account, 'solana:mainnet') : null
-  const { send } = useSendSmartTransaction(signer as any)
+  const { send, signer } = useSendSmartTransaction()
 
   const play = React.useCallback(async (bet: number[] | string, options?: PlayOptions): Promise<PlayResult> => {
     try {
-      if (!account || !signer) throw new Error('Wallet not connected')
+      if (!isConnected || !signer) throw new Error('Wallet not connected')
       if (!selectedPool?.poolAddress || !selectedPool.underlyingTokenMint) throw new Error('Select a token/pool')
 
       const betArray = Array.isArray(bet)
@@ -51,9 +49,7 @@ export function useGambaPlay() {
     } catch (e) {
       return { error: e }
     }
-  }, [rpc, account, selectedPool, send, signer])
+  }, [rpc, isConnected, selectedPool, send, signer])
 
   return { play }
 }
-
-

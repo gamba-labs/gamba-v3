@@ -2,7 +2,7 @@ import React from 'react'
 import { Container, Controls, MetaControls, Screen, Splash } from './Game.styles'
 import { useToken } from '../../../providers/TokenContext'
 import { GAMES } from '../../../games'
-import { useWalletCtx } from '../../../providers/WalletContext'
+import { useConnector } from '@solana/connector'
 import { ConnectWallet } from '../../components/ConnectWallet'
 
 export default function GameSection({ id }: { id: string }) {
@@ -10,7 +10,7 @@ export default function GameSection({ id }: { id: string }) {
   const [showInfo, setShowInfo] = React.useState(false)
   const { selectedPool } = useToken()
   const game = React.useMemo(() => GAMES.find((g) => g.id === id) ?? null, [id])
-  const { isConnected } = useWalletCtx()
+  const { isConnected } = useConnector()
 
   React.useEffect(() => {
     const t = setTimeout(() => setReady(true), 500)
@@ -49,5 +49,3 @@ export default function GameSection({ id }: { id: string }) {
     </Container>
   )
 }
-
-
