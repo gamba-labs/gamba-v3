@@ -3,7 +3,7 @@ import { useConnector } from '@solana/connector'
 import { useSendSmartTransaction } from '../../wallet/useSendSmartTransaction'
 import { instructions, stakeVault } from '@gamba/sdk'
 import type { Address } from '@solana/kit'
-import { useRpc } from '../../rpc/RpcContext'
+import { useRpc } from '../../useRpc'
 
 export function Withdraw() {
   const { isConnected } = useConnector()

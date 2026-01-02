@@ -4,7 +4,7 @@ import { core, instructions, pdas } from '@gamba/sdk'
 import { useConnector } from '@solana/connector'
 import { useSendSmartTransaction } from '../../wallet/useSendSmartTransaction'
 import { type Base58EncodedBytes, type Address } from '@solana/kit'
-import { useRpc } from '../../rpc/RpcContext'
+import { useRpc } from '../../useRpc'
 
 
 type PoolAccount = { address: string; data: ReturnType<typeof core.getPoolDecoder> extends infer D ? D extends { decode: (u8: Uint8Array) => infer T } ? T : never : never }
@@ -102,6 +102,7 @@ function PlayGameForm() {
             poolAddress={selected.address as Address} 
             mint={selected.data.underlyingTokenMint as Address} 
             poolAuthority={selected.data.poolAuthority as Address}
+            minWager={selected.data.minWager}
           />
         )}
         <div className="form-row">
@@ -171,7 +172,7 @@ export function PlayGame() {
 
 
 
-function PoolInfo({ poolAddress, mint, poolAuthority }: { poolAddress: Address; mint: Address; poolAuthority: Address }) {
+function PoolInfo({ poolAddress, mint, poolAuthority, minWager }: { poolAddress: Address; mint: Address; poolAuthority: Address; minWager: bigint }) {
   const { rpc } = useRpc()
   const [liquidity, setLiquidity] = React.useState<string>('…')
 
@@ -192,6 +193,7 @@ function PoolInfo({ poolAddress, mint, poolAuthority }: { poolAddress: Address; 
       <div>Underlying mint: <code>{String(mint)}</code></div>
       <div>Pool address: <code>{String(poolAddress)}</code></div>
       <div>Pool authority: <code>{String(poolAuthority)}</code></div>
+      <div>Min wager: {String(minWager)}</div>
       <div>Liquidity: {liquidity}</div>
     </div>
   )

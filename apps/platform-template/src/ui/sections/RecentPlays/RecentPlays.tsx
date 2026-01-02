@@ -1,11 +1,11 @@
 import React from 'react'
 import bs58 from 'bs58'
 import { core, pdas } from '@gamba/sdk'
-import { useRpc } from '../../../providers/RpcContext'
+import { useRpc } from '../../../useRpc'
 import type { Address } from '@solana/kit'
 import { TOKENS, DEFAULT_POOL_AUTHORITY, RECENT_PLAYS_SCOPE } from '../../../config/constants'
 import { Container, TitleBar, Title, ScopeBadge, List, Row, Cell, Amount, PayoutTag } from './RecentPlays.styles'
-import { createSolanaRpcSubscriptions, address as toAddress } from '@solana/kit'
+import { createSolanaRpcSubscriptions } from '@solana/kit'
 
 type Settled = ReturnType<typeof core.getGameSettledDecoder> extends infer D
   ? D extends { decode: (u8: Uint8Array) => infer T }
@@ -21,7 +21,7 @@ function base64ToBytes(b64: string) {
 }
 
 export function RecentPlays({ limit = 15 }: { limit?: number }) {
-  const { rpc } = useRpc()
+  const { rpc, rpcUrl } = useRpc()
   const [events, setEvents] = React.useState<Array<{ e: Settled; sig: string; time?: number }>>([])
   const [loading, setLoading] = React.useState(false)
   const [err, setErr] = React.useState<string | null>(null)
@@ -218,62 +218,58 @@ export function RecentPlays({ limit = 15 }: { limit?: number }) {
 
   React.useEffect(() => {
     const toWs = (url: string) => url.replace(/^http/i, 'ws')
-    const wsUrl = toWs((import.meta as any).env?.RPC_URL || 'https://api.mainnet-beta.solana.com')
+    const wsUrl = toWs(rpcUrl)
     const rpcSubs = createSolanaRpcSubscriptions(wsUrl)
     const abortController = new AbortController()
     let closed = false
 
-    const getTimeFromSlot = async (slotVal: number | bigint | undefined): Promise<number | undefined> => {
-      const s = typeof slotVal === 'bigint' ? Number(slotVal) : (typeof slotVal === 'number' ? slotVal : undefined)
-      if (typeof s !== 'number') return undefined
-      const cache = slotTimeCacheRef.current
-      if (cache.has(s)) return cache.get(s)
+    ;(async () => {
       try {
-        const t = await (rpc as any).getBlockTime(s).send()
-        if (typeof t === 'number') { cache.set(s, t); return t }
-        const blk = await (rpc as any).getBlock(s, { maxSupportedTransactionVersion: 0 }).send()
-        const bt = typeof blk?.blockTime === 'number' ? blk.blockTime : undefined
-        if (typeof bt === 'number') cache.set(s, bt)
-        return bt
-      } catch { return undefined }
-    }
+        // Subscribe to logs mentioning the Gamba program
+        const notifications = await rpcSubs.logsNotifications(
+          { mentions: [core.GAMBA_PROGRAM_ADDRESS] },
+          { commitment: 'confirmed' }
+        ).subscribe({ abortSignal: abortController.signal })
 
-    const ingestLatest = async () => {
-      try {
-        const sigResp = await rpc.getSignaturesForAddress(core.GAMBA_PROGRAM_ADDRESS, { limit: 20 }).send()
-        for (const s of sigResp) {
-          const signature = s.signature
-          if (seenRef.current.has(signature)) continue
-          const tx = await rpc.getTransaction(signature, { encoding: 'json', maxSupportedTransactionVersion: 0, commitment: 'confirmed' }).send()
-          const logs = (tx?.meta?.logMessages ?? undefined) as readonly string[] | null | undefined
+        for await (const notification of notifications) {
+          if (closed) break
+          
+          const logs = notification.value.logs as readonly string[] | undefined
+          const signature = notification.value.signature as string | undefined
+          
+          if (!signature || !logs || seenRef.current.has(signature)) continue
+          
           const decoded = tryDecodeFromLogs(logs)
           if (!decoded) continue
           if (scope === 'platform' && !poolsRef.current.has(String((decoded as any).pool))) continue
+          
           seenRef.current.add(signature)
-          const slot = (tx as any)?.slot ?? (s as any)?.slot
-          let timeResolved: number | undefined = typeof (tx as any)?.blockTime === 'number' ? (tx as any)?.blockTime : undefined
-          if (typeof timeResolved !== 'number') {
-            const sbt = (s as any)?.blockTime as number | bigint | undefined
-            timeResolved = typeof sbt === 'number' ? sbt : await getTimeFromSlot(slot as any)
-          }
-          setEvents((prev) => [{ e: decoded, sig: signature, time: timeResolved }, ...prev].slice(0, limit))
+          const time = Math.floor(Date.now() / 1000) // Use current time for live events
+          setEvents((prev) => [{ e: decoded, sig: signature, time }, ...prev].slice(0, limit))
         }
-      } catch {}
-    }
-
-    ;(async () => {
-      try {
-        const gambaState = await pdas.deriveGambaStatePda()
-        const notifications = await rpcSubs.accountNotifications(toAddress(String(gambaState)), { commitment: 'confirmed' }).subscribe({ abortSignal: abortController.signal })
-        // Initial ingest
-        await ingestLatest()
-        for await (const n of notifications) {
-          if (closed) break
-          // On any state change, ingest newest signatures
-          await ingestLatest()
+      } catch (e) {
+        console.warn('[RecentPlays] WebSocket subscription failed, falling back to polling', e)
+        // Fallback: poll every 10 seconds
+        const poll = async () => {
+          if (closed) return
+          try {
+            const sigResp = await rpc.getSignaturesForAddress(core.GAMBA_PROGRAM_ADDRESS, { limit: 20 }).send()
+            for (const s of sigResp) {
+              const signature = s.signature
+              if (seenRef.current.has(signature)) continue
+              const tx = await rpc.getTransaction(signature, { encoding: 'json', maxSupportedTransactionVersion: 0, commitment: 'confirmed' }).send()
+              const logs = (tx?.meta?.logMessages ?? undefined) as readonly string[] | null | undefined
+              const decoded = tryDecodeFromLogs(logs)
+              if (!decoded) continue
+              if (scope === 'platform' && !poolsRef.current.has(String((decoded as any).pool))) continue
+              seenRef.current.add(signature)
+              const time = typeof (tx as any)?.blockTime === 'number' ? (tx as any).blockTime : Math.floor(Date.now() / 1000)
+              setEvents((prev) => [{ e: decoded, sig: signature, time }, ...prev].slice(0, limit))
+            }
+          } catch {}
+          if (!closed) setTimeout(poll, 10000)
         }
-      } catch {
-        // ignore
+        poll()
       }
     })()
 
@@ -281,7 +277,7 @@ export function RecentPlays({ limit = 15 }: { limit?: number }) {
       closed = true
       abortController.abort()
     }
-  }, [rpc, scope, limit])
+  }, [rpc, rpcUrl, scope, limit])
 
   return (
     <Container>
@@ -294,10 +290,10 @@ export function RecentPlays({ limit = 15 }: { limit?: number }) {
         {!err && events.length === 0 && (
           <div className="panel" style={{ marginTop: 8, padding: 8, fontSize: 13 }}>No recent plays.</div>
         )}
-        {events.map(({ e, sig, time }) => {
+        {events.map(({ e, sig, time }, idx) => {
           const win = BigInt(e.payout) > 0n
           return (
-            <Row key={sig} $win={win}>
+            <Row key={`${sig}-${idx}`} $win={win}>
               <Cell>
                 <div style={{ display: 'flex', gap: 8 }}>
                   <code>{shorten(String(e.user))}</code>

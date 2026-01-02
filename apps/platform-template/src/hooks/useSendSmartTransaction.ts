@@ -12,7 +12,7 @@ import {
   type Instruction,
 } from '@solana/kit'
 import { useConnector, useKitTransactionSigner } from '@solana/connector'
-import { useRpc } from '../providers/RpcContext'
+import { useRpc } from '../useRpc'
 
 const COMPUTE_UNIT_BUFFER = 1.15 // 15% buffer
 const DEFAULT_COMPUTE_UNITS = 200_000

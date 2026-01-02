@@ -1,11 +1,12 @@
 import React from 'react'
-import styled from 'styled-components'
+import styled, { keyframes, css } from 'styled-components'
 import { useToken } from '../../providers/TokenContext'
-import { useRpc } from '../../providers/RpcContext'
-import { useConnector } from '@solana/connector'
-import { TOKENS } from '../../config/constants'
-import { pdas } from '@gamba/sdk'
-import type { Address } from '@solana/kit'
+import { useBalance } from '../../hooks/useBalance'
+
+const pulse = keyframes`
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+`
 
 const Btn = styled.button`
   appearance: none;
@@ -15,71 +16,99 @@ const Btn = styled.button`
   padding: 6px 10px;
   border-radius: 8px;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+`
+
+const BalanceDisplay = styled.span<{ $updating?: boolean }>`
+  font-variant-numeric: tabular-nums;
+  min-width: 60px;
+  text-align: right;
+  transition: color 0.2s;
+  ${p => p.$updating && css`animation: ${pulse} 0.5s ease;`}
+`
+
+const Dropdown = styled.div`
+  position: absolute;
+  left: 0;
+  margin-top: 6px;
+  background: var(--bg);
+  color: var(--fg);
+  border: 1px solid rgba(125,125,140,0.35);
+  border-radius: 8px;
+  min-width: 180px;
+  overflow: hidden;
+  z-index: 100;
+`
+
+const TokenButton = styled.button`
+  width: 100%;
+  padding: 10px 12px;
+  background: transparent;
+  color: inherit;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  transition: background 0.15s;
+  
+  &:hover {
+    background: rgba(125,125,140,0.1);
+  }
+`
+
+const TokenName = styled.span`
+  font-weight: 500;
+`
+
+const TokenBalance = styled.span`
+  opacity: 0.7;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
 `
 
 export function TokenSelect() {
   const { tokens, selected, setSelected } = useToken()
+  const { balances } = useBalance()
   const [open, setOpen] = React.useState(false)
-  const { rpc } = useRpc()
-  const { account } = useConnector()
-  const [balances, setBalances] = React.useState<Record<string, string>>({})
+  const [lastBalance, setLastBalance] = React.useState<string | null>(null)
+  const [updating, setUpdating] = React.useState(false)
 
+  // Flash effect when balance changes
+  const currentBalance = balances[selected.id]
   React.useEffect(() => {
-    let cancelled = false
-    ;(async () => {
-      if (!account) { setBalances({}); return }
-      try {
-        const results = await Promise.all(tokens.map(async (t) => {
-          const cfg = TOKENS.find((c) => c.id === t.id)
-          if (!cfg) return [t.id, '0'] as const
-          try {
-            const isSol = t.id === 'sol' || String(cfg.mint) === 'So11111111111111111111111111111111111111112'
-            const accountAddress = String((account as any).address ?? account) as Address
-            if (isSol) {
-              const res = await rpc.getBalance(accountAddress).send()
-              const lamports = BigInt((res as any)?.value ?? res ?? 0)
-              const ui = Number(lamports) / 1e9
-              return [t.id, ui.toFixed(4)] as const
-            } else {
-              const ata = await pdas.deriveAta(accountAddress, cfg.mint as Address)
-              const res = await rpc.getTokenAccountBalance(ata).send()
-              const raw = (res?.value?.amount ?? '0') as string
-              const uiStr = (res?.value?.uiAmountString as string | undefined)
-              if (uiStr !== undefined) return [t.id, uiStr] as const
-              const decimals = TOKENS.find((c) => c.id === t.id)?.decimals ?? 0
-              const ui = Number(BigInt(raw)) / Math.pow(10, decimals)
-              return [t.id, ui.toFixed(4)] as const
-            }
-          } catch {
-            return [t.id, '0'] as const
-          }
-        }))
-        if (!cancelled) setBalances(Object.fromEntries(results))
-      } catch {
-        if (!cancelled) setBalances({})
-      }
-    })()
-    return () => { cancelled = true }
-  }, [rpc, account, tokens])
+    if (lastBalance !== null && currentBalance !== lastBalance) {
+      setUpdating(true)
+      const t = setTimeout(() => setUpdating(false), 500)
+      return () => clearTimeout(t)
+    }
+    setLastBalance(currentBalance ?? null)
+  }, [currentBalance, lastBalance])
 
   return (
     <div style={{ position: 'relative' }}>
       <Btn onClick={() => setOpen((v) => !v)} aria-haspopup="listbox" aria-expanded={open}>
-        {selected.ticker} {balances[selected.id] ? `· ${balances[selected.id]}` : ''}
+        <span>{selected.ticker}</span>
+        <BalanceDisplay $updating={updating}>
+          {balances[selected.id] ?? '—'}
+        </BalanceDisplay>
       </Btn>
       {open && (
-        <div style={{ position: 'absolute', left: 0, marginTop: 6, background: 'var(--bg)', color: 'var(--fg)', border: '1px solid rgba(125,125,140,0.35)', borderRadius: 8, minWidth: 160 }}>
+        <Dropdown>
           {tokens.map((t) => (
-            <button
+            <TokenButton
               key={t.id}
-              style={{ width: '100%', padding: '8px 10px', background: 'transparent', color: 'inherit', border: 'none', textAlign: 'left', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}
               onClick={() => { setSelected(t); setOpen(false) }}
             >
-              <span>{t.ticker}</span>
-              <span style={{ opacity: .8, fontSize: 12 }}>{balances[t.id] ?? '—'}</span>
-            </button>
+              <TokenName>{t.ticker}</TokenName>
+              <TokenBalance>{balances[t.id] ?? '—'}</TokenBalance>
+            </TokenButton>
           ))}
-        </div>
+        </Dropdown>
       )}
     </div>
   )

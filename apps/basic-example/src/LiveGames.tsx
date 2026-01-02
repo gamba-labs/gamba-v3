@@ -2,7 +2,7 @@ import React from 'react'
 import bs58 from 'bs58'
 import { multiplayer } from '@gamba/sdk'
 import { type Base58EncodedBytes } from '@solana/kit'
-import { useRpc } from './rpc/RpcContext'
+import { useRpc } from './useRpc'
 
 type GameAccount = { address: string; data: ReturnType<typeof multiplayer.getGameDecoder> extends infer D ? D extends { decode: (u8: Uint8Array) => infer T } ? T : never : never }
 

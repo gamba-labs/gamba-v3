@@ -2,7 +2,7 @@ import React from 'react'
 import { core, pdas } from '@gamba/sdk'
 import type { Address } from '@solana/kit'
 import { TOKENS, DEFAULT_TOKEN_ID, DEFAULT_POOL_AUTHORITY } from '../config/constants'
-import { useRpc } from './RpcContext'
+import { useRpc } from '../useRpc'
 
 export type TokenOption = {
   id: string

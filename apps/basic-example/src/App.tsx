@@ -4,28 +4,17 @@ import { RecentGamesList } from './RecentGames'
 import { ConnectWallet } from './wallet/ConnectWallet'
 import { useConnector } from '@solana/connector'
 import { Instructions } from './instructions/Instructions'
-import { useRpc } from './rpc/RpcContext'
 
 export function App() {
   const { account, isConnected } = useConnector()
-  const { rpcUrl, setRpcUrl } = useRpc()
   const walletLabel = isConnected && account ? `${account.slice(0,4)}…${account.slice(-4)}` : 'Connect'
-  const [rpcOpen, setRpcOpen] = React.useState(false)
   const [walletOpen, setWalletOpen] = React.useState(false)
-  
 
   return (
     <div>
       <div className="topbar">
-        <div className={`dropdown ${rpcOpen ? 'open' : ''}`}>
-          <button onClick={() => { setRpcOpen(!rpcOpen); setWalletOpen(false) }}>RPC ▾</button>
-          <div className="dropdown-menu panel">
-            <div className="muted">RPC URL</div>
-            <input style={{ width: '100%' }} value={rpcUrl} onChange={(e) => setRpcUrl(e.target.value)} />
-          </div>
-        </div>
         <div className={`dropdown ${walletOpen ? 'open' : ''}`}>
-          <button onClick={() => { setWalletOpen(!walletOpen); setRpcOpen(false) }}>{walletLabel} ▾</button>
+          <button onClick={() => setWalletOpen(!walletOpen)}>{walletLabel} ▾</button>
           <div className="dropdown-menu panel">
             <ConnectWallet />
           </div>
@@ -36,18 +25,18 @@ export function App() {
         <div className="muted" style={{ marginBottom: 12 }}>
           {isConnected ? `Connected: ${account}` : 'Not connected'}
         </div>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, alignItems: 'start' }}>
-        <div>
-          <GamesList />
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, alignItems: 'start' }}>
+          <div>
+            <GamesList />
+          </div>
+          <div>
+            <RecentGamesList />
+          </div>
         </div>
-        <div>
-          <RecentGamesList />
-        </div>
-      </div>
 
-      <div style={{ marginTop: 24, display: 'grid', gap: 16 }}>
-        <Instructions />
-      </div>
+        <div style={{ marginTop: 24, display: 'grid', gap: 16 }}>
+          <Instructions />
+        </div>
       </div>
     </div>
   )

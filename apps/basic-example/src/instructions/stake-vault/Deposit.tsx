@@ -4,7 +4,7 @@ import { useSendSmartTransaction } from '../../wallet/useSendSmartTransaction'
 import bs58 from 'bs58'
 import { instructions, stakeVault } from '@gamba/sdk'
 import type { Address, Base58EncodedBytes } from '@solana/kit'
-import { useRpc } from '../../rpc/RpcContext'
+import { useRpc } from '../../useRpc'
 
 export function Deposit() {
   const { isConnected } = useConnector()
