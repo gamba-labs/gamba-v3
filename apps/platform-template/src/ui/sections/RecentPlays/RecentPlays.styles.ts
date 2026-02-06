@@ -1,69 +1,152 @@
-import styled from 'styled-components'
+import styled, { keyframes } from 'styled-components'
+
+const jackpotGradient = keyframes`
+  0% { background: #6666ff; }
+  15% { background: #0099ff; }
+  30% { background: #00ff55; }
+  45% { background: #ffe44d; }
+  60% { background: #ff5c4d; }
+  75% { background: #ff3399; }
+  90% { background: #6666ff; }
+  100% { background: #6666ff; }
+`
+
+const skeletonAnimation = keyframes`
+  0%, 100% { background-color: #cccccc11; }
+  50% { background-color: #cccccc22; }
+`
 
 export const Container = styled.section`
-  border: 1px solid rgba(125,125,140,0.25);
-  border-radius: 12px;
-  background: #0c0c11;
-  overflow: hidden;
-`
-
-export const TitleBar = styled.div`
+  width: 100%;
+  position: relative;
   display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 12px;
-  border-bottom: 1px solid rgba(125,125,140,0.2);
-`
-
-export const Title = styled.h3`
-  margin: 0;
-  font-size: 14px;
-`
-
-export const ScopeBadge = styled.span`
-  margin-left: auto;
-  font-size: 11px;
-  opacity: 0.8;
-  background: #ffffff14;
-  padding: 4px 8px;
-  border-radius: 999px;
+  flex-direction: column;
+  gap: 10px;
 `
 
 export const List = styled.div`
-  max-height: 360px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 420px;
   overflow-y: auto;
 `
 
-export const Row = styled.div<{ $win?: boolean }>`
-  display: grid;
-  grid-template-columns: 1fr 120px 140px 80px;
-  gap: 8px;
-  padding: 10px 12px;
-  border-bottom: 1px solid rgba(125,125,140,0.12);
+export const Recent = styled.button`
+  all: unset;
+  box-sizing: border-box;
+  cursor: pointer;
+  display: flex;
   align-items: center;
-  &:last-child { border-bottom: none; }
-  background: ${(p) => (p.$win ? 'linear-gradient(90deg, #0f1a12, transparent)' : 'transparent')};
+  gap: 0.5em;
+  text-wrap: nowrap;
+  padding: 10px;
+  color: inherit;
+  text-decoration: none;
+  justify-content: space-between;
+  border-radius: 10px;
+  background: #0f121b;
+
+  &:hover {
+    background: #131724;
+  }
 `
 
-export const Cell = styled.div`
+export const RecentMain = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
   min-width: 0;
-  font-size: 13px;
-  opacity: 0.95;
-  & > code { font-size: 12px; }
-  &[data-right] { text-align: right; }
 `
 
-export const Amount = styled.span`
-  font-weight: 600;
+export const GameImage = styled.img`
+  height: 1.5em;
+  width: 1.5em;
+  object-fit: contain;
 `
 
-export const PayoutTag = styled.span<{ $win?: boolean }>`
+export const UserAddress = styled.div`
+  color: var(--gamba-ui-primary-color);
+  font-size: 14px;
+`
+
+export const Action = styled.div`
+  opacity: 0.8;
+
+  @media (max-width: 760px) {
+    display: none;
+  }
+`
+
+export const Profit = styled.div<{ $win: boolean }>`
+  display: flex;
+  gap: 0.5em;
+  align-items: center;
+  background: ${(props) => (props.$win ? '#00ff4021' : '#ffffff11')};
+  border-radius: 10px;
+  padding: 2px 6px;
+  font-size: 14px;
+`
+
+export const TokenIcon = styled.img`
+  height: 20px;
+  width: 20px;
+  border-radius: 50%;
+  object-fit: cover;
+`
+
+export const TokenFallback = styled.span`
+  height: 20px;
+  width: 20px;
+  border-radius: 50%;
+  display: inline-grid;
+  place-items: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: #fff;
+  background: #373952;
+`
+
+export const Multiplier = styled.div`
+  opacity: 0.75;
   font-size: 12px;
-  border-radius: 999px;
-  padding: 3px 8px;
-  justify-self: end;
-  color: ${(p) => (p.$win ? '#2cff91' : '#ff6b6b')};
-  background: ${(p) => (p.$win ? '#2cff9114' : '#ff6b6b14')};
+
+  @media (max-width: 760px) {
+    display: none;
+  }
 `
 
+export const Jackpot = styled.div`
+  animation: ${jackpotGradient} 1s linear 0s infinite;
+  display: flex;
+  gap: 0.5em;
+  align-items: center;
+  color: #000;
+  border-radius: 10px;
+  padding: 1px 5px;
 
+  @media (max-width: 760px) {
+    display: none;
+  }
+`
+
+export const Time = styled.div`
+  opacity: 0.7;
+  font-size: 12px;
+  white-space: nowrap;
+`
+
+export const Skeleton = styled.div`
+  height: 40px;
+  width: 100%;
+  border-radius: 10px;
+  animation: ${skeletonAnimation} 1s infinite;
+`
+
+export const Panel = styled.div`
+  padding: 10px;
+  border-radius: 10px;
+  background: #0f121b;
+  font-size: 13px;
+  opacity: 0.8;
+`

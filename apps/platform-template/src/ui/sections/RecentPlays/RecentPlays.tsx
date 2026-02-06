@@ -3,7 +3,24 @@ import bs58 from 'bs58'
 import { core, pdas } from '@gamba/core'
 import type { Address } from '@solana/kit'
 import { TOKENS, DEFAULT_POOL_AUTHORITY, RECENT_PLAYS_SCOPE } from '../../../config/constants'
-import { Container, TitleBar, Title, ScopeBadge, List, Row, Cell, Amount, PayoutTag } from './RecentPlays.styles'
+import { GAMES } from '../../../games'
+import {
+  Action,
+  Container,
+  GameImage,
+  Jackpot,
+  List,
+  Multiplier,
+  Panel,
+  Profit,
+  Recent,
+  RecentMain,
+  Skeleton,
+  Time,
+  TokenFallback,
+  TokenIcon,
+  UserAddress,
+} from './RecentPlays.styles'
 import { createSolanaRpcSubscriptions } from '@solana/kit'
 import { useGambaRpc } from '@gamba/react'
 
@@ -163,6 +180,21 @@ export function RecentPlays({ limit = 15 }: { limit?: number }) {
     const d = getDecimals(mint)
     return (n / Math.pow(10, d)).toFixed(Math.min(4, d))
   }
+  const getTokenImage = (mint: Address): string | undefined => TOKENS.find((t) => String(t.mint) === String(mint))?.image
+  const getGameImage = (metadata: string): string => {
+    try {
+      const parsed = JSON.parse(metadata || '{}') as { gameId?: string; id?: string; game?: string; name?: string }
+      const key = parsed.gameId ?? parsed.id ?? parsed.game ?? parsed.name
+      if (typeof key === 'string' && key.trim().length > 0) {
+        const normalized = key.trim().toLowerCase()
+        const found = GAMES.find(
+          (game) => game.id.toLowerCase() === normalized || game.meta.name.toLowerCase() === normalized,
+        )
+        if (found?.meta.image) return found.meta.image
+      }
+    } catch {}
+    return '/gamba.svg'
+  }
 
   // Coerce numbers that may arrive as bigint from RPC (e.g., blockTime, slot)
   const asNumber = (v: unknown): number | undefined => {
@@ -279,38 +311,50 @@ export function RecentPlays({ limit = 15 }: { limit?: number }) {
 
   return (
     <Container>
-      <TitleBar>
-        <Title>Recent Plays</Title>
-        <ScopeBadge>{scope === 'platform' ? 'This Platform' : 'Global'}</ScopeBadge>
-      </TitleBar>
       <List>
-        {err && <div className="panel" style={{ color: 'crimson', marginTop: 8, padding: 8, fontSize: 13 }}>Error: {err}</div>}
-        {!err && events.length === 0 && (
-          <div className="panel" style={{ marginTop: 8, padding: 8, fontSize: 13 }}>No recent plays.</div>
-        )}
+        {err && <Panel style={{ color: 'crimson' }}>Error: {err}</Panel>}
+        {loading && !err && events.length === 0 && Array.from({ length: 10 }).map((_, i) => <Skeleton key={i} />)}
+        {!loading && !err && events.length === 0 && <Panel>No recent plays.</Panel>}
         {events.map(({ e, sig, time }, idx) => {
-          const win = BigInt(e.payout) > 0n
+          const mint = e.tokenMint as Address
+          const wager = BigInt(e.wager as any)
+          const payout = BigInt(e.payout as any)
+          const profit = payout - wager
+          const absoluteProfit = profit >= 0n ? profit : -profit
+          const win = profit > 0n
+          const tokenTicker = getTicker(mint)
+          const tokenImage = getTokenImage(mint)
+          const jackpotPayout = BigInt(e.jackpotPayoutToUser as any)
+          const multiplier = Number(e.multiplierBps) / 10000
+
           return (
-            <Row key={`${sig}-${idx}`} $win={win}>
-              <Cell>
-                <div style={{ display: 'flex', gap: 8 }}>
-                  <code>{shorten(String(e.user))}</code>
-                </div>
-              </Cell>
-              <Cell data-right>
-                <Amount>{formatUnits(e.wager as any, e.tokenMint as Address)} {getTicker(e.tokenMint as Address)}</Amount>
-              </Cell>
-              <Cell data-right>
-                <PayoutTag $win={win}>{win ? `+${formatUnits(e.payout as any, e.tokenMint as Address)} ${getTicker(e.tokenMint as Address)}` : '0'}</PayoutTag>
-              </Cell>
-              <Cell data-right>
-                <div className="muted" style={{ fontSize: 12 }}>{timeAgo(time)}</div>
-              </Cell>
-            </Row>
+            <Recent key={`${sig}-${idx}`} type="button">
+              <RecentMain>
+                <GameImage src={getGameImage(e.metadata)} alt="" />
+                <UserAddress>{shorten(String(e.user))}</UserAddress>
+                <Action>{win ? 'won' : 'lost'}</Action>
+                <Profit $win={win}>
+                  {tokenImage ? (
+                    <TokenIcon src={tokenImage} alt={tokenTicker} />
+                  ) : (
+                    <TokenFallback>{tokenTicker.slice(0, 1)}</TokenFallback>
+                  )}
+                  <span>
+                    {formatUnits(absoluteProfit, mint)} {tokenTicker}
+                  </span>
+                </Profit>
+                {win && <Multiplier>({multiplier.toFixed(2)}x)</Multiplier>}
+                {jackpotPayout > 0n && (
+                  <Jackpot>
+                    +{formatUnits(jackpotPayout, mint)} {tokenTicker}
+                  </Jackpot>
+                )}
+              </RecentMain>
+              <Time>{timeAgo(time)}</Time>
+            </Recent>
           )
         })}
       </List>
     </Container>
   )
 }
-
