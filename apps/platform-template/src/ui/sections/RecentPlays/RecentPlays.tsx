@@ -1,11 +1,11 @@
 import React from 'react'
 import bs58 from 'bs58'
-import { core, pdas } from '@gamba/sdk'
-import { useRpc } from '../../../useRpc'
+import { core, pdas } from '@gamba/core'
 import type { Address } from '@solana/kit'
 import { TOKENS, DEFAULT_POOL_AUTHORITY, RECENT_PLAYS_SCOPE } from '../../../config/constants'
 import { Container, TitleBar, Title, ScopeBadge, List, Row, Cell, Amount, PayoutTag } from './RecentPlays.styles'
 import { createSolanaRpcSubscriptions } from '@solana/kit'
+import { useGambaRpc } from '@gamba/react'
 
 type Settled = ReturnType<typeof core.getGameSettledDecoder> extends infer D
   ? D extends { decode: (u8: Uint8Array) => infer T }
@@ -21,7 +21,7 @@ function base64ToBytes(b64: string) {
 }
 
 export function RecentPlays({ limit = 15 }: { limit?: number }) {
-  const { rpc, rpcUrl } = useRpc()
+  const { rpc, wsUrl } = useGambaRpc()
   const [events, setEvents] = React.useState<Array<{ e: Settled; sig: string; time?: number }>>([])
   const [loading, setLoading] = React.useState(false)
   const [err, setErr] = React.useState<string | null>(null)
@@ -217,8 +217,6 @@ export function RecentPlays({ limit = 15 }: { limit?: number }) {
   }, [scope, getPlatformPools])
 
   React.useEffect(() => {
-    const toWs = (url: string) => url.replace(/^http/i, 'ws')
-    const wsUrl = toWs(rpcUrl)
     const rpcSubs = createSolanaRpcSubscriptions(wsUrl)
     const abortController = new AbortController()
     let closed = false
@@ -277,7 +275,7 @@ export function RecentPlays({ limit = 15 }: { limit?: number }) {
       closed = true
       abortController.abort()
     }
-  }, [rpc, rpcUrl, scope, limit])
+  }, [rpc, wsUrl, scope, limit])
 
   return (
     <Container>
@@ -315,5 +313,4 @@ export function RecentPlays({ limit = 15 }: { limit?: number }) {
     </Container>
   )
 }
-
 

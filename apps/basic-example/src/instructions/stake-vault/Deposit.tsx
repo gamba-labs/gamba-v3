@@ -2,7 +2,7 @@ import React from 'react'
 import { useConnector } from '@solana/connector'
 import { useSendSmartTransaction } from '../../wallet/useSendSmartTransaction'
 import bs58 from 'bs58'
-import { instructions, stakeVault } from '@gamba/sdk'
+import { instructions, stakeVault } from '@gamba/core'
 import type { Address, Base58EncodedBytes } from '@solana/kit'
 import { useRpc } from '../../useRpc'
 

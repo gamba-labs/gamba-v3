@@ -9,35 +9,61 @@ export function App() {
   const { account, isConnected } = useConnector()
   const walletLabel = isConnected && account ? `${account.slice(0,4)}…${account.slice(-4)}` : 'Connect'
   const [walletOpen, setWalletOpen] = React.useState(false)
+  const walletRef = React.useRef<HTMLDivElement | null>(null)
+
+  React.useEffect(() => {
+    if (!walletOpen) return
+    const handleClick = (event: MouseEvent) => {
+      if (!walletRef.current) return
+      if (!walletRef.current.contains(event.target as Node)) {
+        setWalletOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
+  }, [walletOpen])
 
   return (
-    <div>
-      <div className="topbar">
-        <div className={`dropdown ${walletOpen ? 'open' : ''}`}>
-          <button onClick={() => setWalletOpen(!walletOpen)}>{walletLabel} ▾</button>
-          <div className="dropdown-menu panel">
-            <ConnectWallet />
+    <div className="container">
+      <header className="header">
+        <div>
+          <h1>Gamba SDK Basic Example</h1>
+          <div className="muted">
+            {isConnected ? `Connected: ${account}` : 'Not connected'}
           </div>
         </div>
-      </div>
-      <div className="container">
-        <h1>Gamba SDK Basic Example</h1>
-        <div className="muted" style={{ marginBottom: 12 }}>
-          {isConnected ? `Connected: ${account}` : 'Not connected'}
+        <div className="wallet" ref={walletRef}>
+          <button
+            className="wallet-button"
+            onClick={() => setWalletOpen((open) => !open)}
+          >
+            <span className="wallet-name">{walletLabel}</span>
+            <span className="wallet-meta">▼</span>
+          </button>
+          {walletOpen && (
+            <div className="wallet-dropdown panel panel-tight wallet-panel">
+              <ConnectWallet />
+            </div>
+          )}
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, alignItems: 'start' }}>
-          <div>
-            <GamesList />
-          </div>
-          <div>
-            <RecentGamesList />
-          </div>
-        </div>
+      </header>
 
-        <div style={{ marginTop: 24, display: 'grid', gap: 16 }}>
-          <Instructions />
-        </div>
+      <div className="section-grid">
+        <section className="section">
+          <h2>Live Games</h2>
+          <GamesList />
+        </section>
+
+        <section className="section">
+          <h2>Recent Games</h2>
+          <RecentGamesList />
+        </section>
       </div>
+
+      <section className="section">
+        <h2>Instructions</h2>
+        <Instructions />
+      </section>
     </div>
   )
 }

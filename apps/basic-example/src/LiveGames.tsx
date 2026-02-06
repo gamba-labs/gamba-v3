@@ -1,6 +1,6 @@
 import React from 'react'
 import bs58 from 'bs58'
-import { multiplayer } from '@gamba/sdk'
+import { multiplayer } from '@gamba/core'
 import { type Base58EncodedBytes } from '@solana/kit'
 import { useRpc } from './useRpc'
 

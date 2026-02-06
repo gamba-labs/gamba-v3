@@ -1,11 +1,10 @@
 import React from 'react'
-import { useRpc } from '../useRpc'
 import { useConnector } from '@solana/connector'
-import { instructions, core, pdas } from '@gamba/sdk'
+import { instructions, core, pdas } from '@gamba/core'
 import { useToken } from '../providers/TokenContext'
 import type { Address } from '@solana/kit'
-import { useSendSmartTransaction } from './useSendSmartTransaction'
 import { createSolanaRpcSubscriptions } from '@solana/kit'
+import { useGambaRpc, useSendSmartTransaction } from '@gamba/react'
 
 type Game = ReturnType<typeof core.getGameDecoder> extends infer D
   ? D extends { decode: (u8: Uint8Array) => infer T } ? T : never
@@ -44,7 +43,7 @@ async function fetchGameAccount(rpc: any, gameAddress: Address): Promise<Game | 
 }
 
 export function useGambaPlay() {
-  const { rpc, rpcUrl } = useRpc()
+  const { rpc, wsUrl } = useGambaRpc()
   const { isConnected } = useConnector()
   const { selectedPool } = useToken()
   const { send, signer } = useSendSmartTransaction()
@@ -71,7 +70,6 @@ export function useGambaPlay() {
       console.log('[useGambaPlay] Previous nonce:', prevNonce)
 
       // Set up WebSocket subscription to watch Game account BEFORE sending
-      const wsUrl = rpcUrl.replace(/^http/i, 'ws')
       const rpcSubs = createSolanaRpcSubscriptions(wsUrl)
       const abortController = new AbortController()
 
@@ -186,7 +184,7 @@ export function useGambaPlay() {
       console.error('[useGambaPlay] Error:', e)
       return { error: e }
     }
-  }, [rpc, rpcUrl, isConnected, selectedPool, send, signer])
+  }, [rpc, wsUrl, isConnected, selectedPool, send, signer])
 
   return { play }
 }

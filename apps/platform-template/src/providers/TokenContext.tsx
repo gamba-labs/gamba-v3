@@ -1,8 +1,8 @@
 import React from 'react'
-import { core, pdas } from '@gamba/sdk'
+import { core, pdas } from '@gamba/core'
 import type { Address } from '@solana/kit'
 import { TOKENS, DEFAULT_TOKEN_ID, DEFAULT_POOL_AUTHORITY } from '../config/constants'
-import { useRpc } from '../useRpc'
+import { useGambaRpc } from '@gamba/react'
 
 export type TokenOption = {
   id: string
@@ -25,7 +25,7 @@ type TokenContextType = {
 const TokenContext = React.createContext<TokenContextType | undefined>(undefined)
 
 export function TokenProvider({ children }: { children: React.ReactNode }) {
-  const { rpc } = useRpc()
+  const { rpc } = useGambaRpc()
   const options: TokenOption[] = React.useMemo(() => TOKENS.map((t) => ({ id: t.id, ticker: t.ticker })), [])
   const [selected, setSelected] = React.useState<TokenOption>(() => options.find((t) => t.id === DEFAULT_TOKEN_ID) ?? options[0])
   const [selectedPool, setSelectedPool] = React.useState<SelectedPoolInfo | null>(null)
@@ -84,5 +84,4 @@ export function useToken() {
   if (!ctx) throw new Error('useToken must be used within TokenProvider')
   return ctx
 }
-
 

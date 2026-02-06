@@ -13,18 +13,13 @@ export function ConnectWallet() {
 
   if (isConnected && account) {
     return (
-      <div className="grid gap-8">
-        <div className="muted">Connected</div>
-        <code style={{ 
-          display: 'block',
-          padding: '8px', 
-          background: '#f5f5f5',
-          fontSize: 11,
-          wordBreak: 'break-all'
-        }}>
-          {account}
-        </code>
-        <button onClick={disconnectWallet}>
+      <div className="wallet-stack">
+        <div className="wallet-status-line">
+          <span className="dot dot-ok" />
+          <span className="muted">Connected</span>
+        </div>
+        <code className="wallet-address">{account}</code>
+        <button className="wallet-button secondary" onClick={disconnectWallet}>
           Disconnect
         </button>
       </div>
@@ -33,44 +28,30 @@ export function ConnectWallet() {
 
   if (!connectors.length) {
     return (
-      <div className="grid gap-8" style={{ textAlign: 'center' }}>
+      <div className="wallet-empty">
         <div className="muted">No wallets detected</div>
-        <div style={{ fontSize: 13 }}>
-          Install a Solana wallet extension
-        </div>
+        <div className="wallet-help">Install a Solana wallet extension</div>
       </div>
     )
   }
 
   return (
-    <div className="grid gap-8">
+    <div className="wallet-stack">
       <div className="muted">Select wallet</div>
       {connectors.map((connector) => (
         <button
           key={connector.id}
           onClick={() => connectWallet(connector.id)}
           disabled={isConnecting || !connector.ready}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 10,
-            width: '100%',
-            textAlign: 'left',
-          }}
+          className="wallet-button"
         >
           {connector.icon && (
-            <img 
-              src={connector.icon} 
-              alt="" 
-              style={{ width: 20, height: 20 }} 
-            />
+            <img src={connector.icon} alt="" className="wallet-icon" />
           )}
-          <span style={{ flex: 1, fontWeight: 500 }}>
-            {connector.name}
+          <span className="wallet-name">{connector.name}</span>
+          <span className="wallet-meta">
+            {!connector.ready ? 'Not installed' : isConnecting ? 'Connecting…' : 'Connect'}
           </span>
-          {isConnecting && (
-            <span className="muted">…</span>
-          )}
         </button>
       ))}
     </div>

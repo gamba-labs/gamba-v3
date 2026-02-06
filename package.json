@@ -2,17 +2,15 @@
   "private": true,
   "scripts": {
     "build": "turbo run build",
-    "dev": "turbo run dev --no-cache --continue",
+    "dev": "turbo run dev --cache=local:r,remote:r --continue",
     "clean": "echo '🧹 Cleaning workspace...' && rm -rf node_modules apps/*/node_modules packages/*/node_modules apps/*/dist packages/*/dist .turbo apps/*/.turbo packages/*/.turbo pnpm-lock.yaml && echo '✨ Clean complete! Run pnpm install to reinstall.'",
     "changeset": "changeset",
     "version-packages": "changeset version"
   },
   "devDependencies": {
     "@changesets/cli": "^2.29.7",
-    "@wallet-standard/app": "^1.1.0",
-    "@wallet-standard/features": "^1.1.0",
-    "turbo": "^1.13.4",
+    "turbo": "^2.8.3",
     "typescript": "^5.9.2"
   },
-  "packageManager": "pnpm@10.15.1+sha512.34e538c329b5553014ca8e8f4535997f96180a1d0f614339357449935350d924e22f8614682191264ec33d1462ac21561aff97f6bb18065351c162c7e8f6de67"
+  "packageManager": "pnpm@10.26.1+sha512.664074abc367d2c9324fdc18037097ce0a8f126034160f709928e9e9f95d98714347044e5c3164d65bd5da6c59c6be362b107546292a8eecb7999196e5ce58fa"
 }

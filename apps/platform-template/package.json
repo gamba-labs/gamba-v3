@@ -9,14 +9,15 @@
     "preview": "vite preview --port 5174"
   },
   "dependencies": {
-    "@gamba/sdk": "workspace:*",
-    "@solana/kit": "^3.0.0",
-    "@solana/connector": "^0.2.0",
-    "framer-motion": "^11.3.30",
-    "styled-components": "^6.1.8",
+    "@gamba/core": "workspace:*",
+    "@gamba/react": "workspace:*",
+    "@solana/connector": "^0.2.4",
+    "@solana/kit": "^5.5.1",
     "bs58": "^6.0.0",
+    "framer-motion": "^11.3.30",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "styled-components": "^6.1.8"
   },
   "devDependencies": {
     "@types/react": "^19.0.0",

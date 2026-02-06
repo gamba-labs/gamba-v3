@@ -1,10 +1,10 @@
 import React from 'react'
-import { useRpc } from '../useRpc'
 import { useConnector } from '@solana/connector'
-import { pdas } from '@gamba/sdk'
+import { pdas } from '@gamba/core'
 import { createSolanaRpcSubscriptions } from '@solana/kit'
 import type { Address } from '@solana/kit'
 import { TOKENS } from '../config/constants'
+import { useGambaRpc } from '@gamba/react'
 
 type Balances = Record<string, string>
 
@@ -16,7 +16,7 @@ function base64ToBytes(b64: string): Uint8Array {
 }
 
 export function useBalance() {
-  const { rpc, rpcUrl } = useRpc()
+  const { rpc, wsUrl } = useGambaRpc()
   const { account, isConnected } = useConnector()
   const [balances, setBalances] = React.useState<Balances>({})
   const [loading, setLoading] = React.useState(true)
@@ -75,7 +75,6 @@ export function useBalance() {
   React.useEffect(() => {
     if (!userAddress || !isConnected) return
 
-    const wsUrl = rpcUrl.replace(/^http/i, 'ws')
     const rpcSubs = createSolanaRpcSubscriptions(wsUrl)
     const abortController = new AbortController()
     let closed = false
@@ -143,7 +142,7 @@ export function useBalance() {
       closed = true
       abortController.abort()
     }
-  }, [rpcUrl, userAddress, isConnected])
+  }, [wsUrl, userAddress, isConnected])
 
   // Refetch function for manual refresh
   const refetch = React.useCallback(() => {
@@ -153,4 +152,3 @@ export function useBalance() {
 
   return { balances, loading, refetch }
 }
-

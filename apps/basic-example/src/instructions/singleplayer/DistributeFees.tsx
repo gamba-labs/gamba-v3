@@ -1,7 +1,7 @@
 import React from 'react'
 import { useConnector } from '@solana/connector'
 import { useSendSmartTransaction } from '../../wallet/useSendSmartTransaction'
-import { core, pdas, instructions } from '@gamba/sdk'
+import { core, pdas, instructions } from '@gamba/core'
 import type { Address } from '@solana/kit'
 import { useRpc } from '../../useRpc'
 

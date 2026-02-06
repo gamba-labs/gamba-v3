@@ -1,6 +1,6 @@
 import React from 'react'
 import bs58 from 'bs58'
-import { core, instructions, pdas } from '@gamba/sdk'
+import { core, instructions, pdas } from '@gamba/core'
 import { useConnector } from '@solana/connector'
 import { useSendSmartTransaction } from '../../wallet/useSendSmartTransaction'
 import { type Base58EncodedBytes, type Address } from '@solana/kit'

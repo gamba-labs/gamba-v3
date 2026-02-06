@@ -1,0 +1,39 @@
+{
+  "name": "@gamba/react",
+  "version": "0.0.0",
+  "private": false,
+  "type": "module",
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "scripts": {
+    "build": "tsup src/index.ts --dts --format esm,cjs --sourcemap",
+    "clean": "rm -rf dist",
+    "dev": "tsup src/index.ts --dts --format esm,cjs --sourcemap --watch"
+  },
+  "peerDependencies": {
+    "@gamba/core": "*",
+    "@solana/connector": "^0.2.4",
+    "@solana/kit": "^5.5.1",
+    "react": "^19.0.0"
+  },
+  "devDependencies": {
+    "@gamba/core": "workspace:*",
+    "@types/react": "^19.0.0",
+    "tsup": "^8.2.4",
+    "typescript": "^5.9.2"
+  },
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
+}

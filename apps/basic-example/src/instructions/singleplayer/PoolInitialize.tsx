@@ -1,7 +1,7 @@
 import React from 'react'
 import { useConnector } from '@solana/connector'
 import { useSendSmartTransaction } from '../../wallet/useSendSmartTransaction'
-import { instructions, pdas } from '@gamba/sdk'
+import { instructions, pdas } from '@gamba/core'
 import type { Address } from '@solana/kit'
 
 export function PoolInitialize() {

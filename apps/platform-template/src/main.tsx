@@ -2,6 +2,7 @@ import { createRoot } from 'react-dom/client'
 import { App } from './ui/App'
 import { TokenProvider } from './providers/TokenContext'
 import { AppProvider, getDefaultConfig } from '@solana/connector'
+import { GambaReactProvider } from '@gamba/react'
 import './ui/styles/global.css'
 
 const RPC_URL = (import.meta as any).env?.VITE_SOLANA_RPC_URL || 'https://api.mainnet-beta.solana.com'
@@ -16,9 +17,11 @@ const connectorConfig = getDefaultConfig({
 })
 
 createRoot(document.getElementById('root')!).render(
-  <AppProvider connectorConfig={connectorConfig}>
-    <TokenProvider>
-      <App />
-    </TokenProvider>
-  </AppProvider>
+  <GambaReactProvider rpcUrl={RPC_URL}>
+    <AppProvider connectorConfig={connectorConfig}>
+      <TokenProvider>
+        <App />
+      </TokenProvider>
+    </AppProvider>
+  </GambaReactProvider>
 )

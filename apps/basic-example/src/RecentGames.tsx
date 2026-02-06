@@ -1,6 +1,6 @@
 import React from 'react'
 import bs58 from 'bs58'
-import { core } from '@gamba/sdk'
+import { core } from '@gamba/core'
 import { useRpc } from './useRpc'
 
 type Settled = ReturnType<typeof core.getGameSettledDecoder> extends infer D
