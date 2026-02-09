@@ -39,6 +39,16 @@ export const DEFAULT_POOL_AUTHORITY = '11111111111111111111111111111111' as Addr
 
 // Platform creator address (fee recipient), set this to your platform's address
 export const PLATFORM_CREATOR_ADDRESS = 'V2grJiwjs25iJYqumbHyKo5MTK7SFqZSdmoRaj8QWb9' as Address
+// Platform creator fee (1% = 100 bps)
+export const PLATFORM_CREATOR_FEE_BPS = 100
+// Referral fee (0.25% = 25 bps) deducted from creator fee
+export const PLATFORM_REFERRAL_FEE_BPS = 25
+// Whether user can remove an accepted referral invite
+export const PLATFORM_ALLOW_REFERRER_REMOVAL = true
+// URL param used for invite links, e.g. ?code=<wallet>
+export const REFERRAL_CODE_PREFIX = 'code'
+// Enable/disable leaderboard modal in header
+export const ENABLE_LEADERBOARD = true
 
 // Recent plays scope: 'platform' (pools from TOKENS) or 'global'
 export const RECENT_PLAYS_SCOPE: 'platform' | 'global' = 'platform'

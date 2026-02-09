@@ -1,0 +1,60 @@
+import React from 'react'
+import styled, { css } from 'styled-components'
+
+type ButtonSize = 'small' | 'medium' | 'large'
+
+const StyledButton = styled.button<{ $main?: boolean; $size?: ButtonSize }>`
+  --color: var(--gamba-ui-button-default-color);
+  --background-color: var(--gamba-ui-button-default-background);
+  --background-color-hover: var(--gamba-ui-button-default-background-hover);
+
+  ${({ $main }) =>
+    $main &&
+    css`
+      --background-color: var(--gamba-ui-button-main-background);
+      --color: var(--gamba-ui-button-main-color);
+      --background-color-hover: var(--gamba-ui-button-main-background-hover);
+    `}
+
+  ${({ $size = 'medium' }) =>
+    css`
+      --padding: ${$size === 'small' ? '5px' : $size === 'large' ? '15px' : '10px'};
+    `}
+
+  background: var(--background-color);
+  color: var(--color);
+
+  &:hover:not(:disabled) {
+    background: var(--background-color-hover);
+  }
+
+  border: none;
+  border-radius: var(--gamba-ui-border-radius);
+  padding: var(--padding);
+  cursor: pointer;
+  text-align: center;
+
+  &:disabled {
+    cursor: default;
+    opacity: 0.7;
+  }
+`
+
+export interface ButtonProps {
+  disabled?: boolean
+  onClick?: () => void
+  main?: boolean
+  size?: ButtonSize
+  children?: React.ReactNode | bigint
+  className?: string
+}
+
+export function Button({ disabled, onClick, main, size, children, className }: ButtonProps) {
+  const safeChildren = typeof children === 'bigint' ? children.toString() : children
+
+  return (
+    <StyledButton className={className} disabled={disabled} onClick={onClick} $main={main} $size={size}>
+      {safeChildren}
+    </StyledButton>
+  )
+}

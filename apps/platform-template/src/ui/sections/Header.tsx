@@ -1,7 +1,11 @@
+import React from 'react'
 import { NavLink } from 'react-router-dom'
 import styled from 'styled-components'
+import { ENABLE_LEADERBOARD, PLATFORM_CREATOR_ADDRESS } from '../../config/constants'
 import { ConnectWallet } from '../components/ConnectWallet'
 import { TokenSelect } from '../components/TokenSelect'
+import { UiButton } from '../components/primitives'
+import LeaderboardsModal from './LeaderBoard/LeaderboardsModal'
 
 const StyledHeader = styled.header`
   display: flex;
@@ -33,20 +37,35 @@ const Right = styled.div`
   position: relative;
 `
 
-export function Header() {
-  return (
-    <StyledHeader>
-      <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
-        <Logo to="/">
-          <img alt="Gamba logo" src="/logo.svg" />
-        </Logo>
-      </div>
+const LeaderboardButton = styled(UiButton)`
+  @media (max-width: 800px) {
+    display: none;
+  }
+`
 
-      <Right>
-        <TokenSelect />
-        <ConnectWallet />
-      </Right>
-    </StyledHeader>
+export function Header() {
+  const [showLeaderboard, setShowLeaderboard] = React.useState(false)
+
+  return (
+    <>
+      {ENABLE_LEADERBOARD && (
+        <LeaderboardsModal open={showLeaderboard} onClose={() => setShowLeaderboard(false)} creator={String(PLATFORM_CREATOR_ADDRESS)} />
+      )}
+
+      <StyledHeader>
+        <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
+          <Logo to="/">
+            <img alt="Gamba logo" src="/logo.svg" />
+          </Logo>
+        </div>
+
+        <Right>
+          {ENABLE_LEADERBOARD && <LeaderboardButton onClick={() => setShowLeaderboard(true)}>Leaderboard</LeaderboardButton>}
+          <TokenSelect />
+          <ConnectWallet />
+        </Right>
+      </StyledHeader>
+    </>
   )
 }
 

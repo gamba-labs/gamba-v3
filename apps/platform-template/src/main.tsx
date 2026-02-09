@@ -1,6 +1,7 @@
 import { createRoot } from 'react-dom/client'
 import { App } from './ui/App'
 import { TokenProvider } from './providers/TokenContext'
+import { ConnectWalletModalProvider } from './providers/ConnectWalletModalContext'
 import { AppProvider, getDefaultConfig } from '@solana/connector'
 import { GambaReactProvider } from '@gamba/react'
 import { BrowserRouter } from 'react-router-dom'
@@ -22,7 +23,9 @@ createRoot(document.getElementById('root')!).render(
     <AppProvider connectorConfig={connectorConfig}>
       <BrowserRouter>
         <TokenProvider>
-          <App />
+          <ConnectWalletModalProvider>
+            <App />
+          </ConnectWalletModalProvider>
         </TokenProvider>
       </BrowserRouter>
     </AppProvider>

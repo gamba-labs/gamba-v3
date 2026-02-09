@@ -66,8 +66,8 @@ export const MenuPanel = styled.div`
   background: #15151f;
   border-radius: 10px;
   overflow: hidden;
-  padding: 5px;
-  gap: 5px;
+  padding: 6px;
+  gap: 4px;
   border: 1px solid rgba(125, 125, 140, 0.25);
   animation: ${menuAppear} 0.18s ease;
 `
@@ -99,4 +99,10 @@ export const MenuInfo = styled.div`
   opacity: 0.7;
   padding: 8px 10px;
   word-break: break-all;
+`
+
+export const MenuDivider = styled.div`
+  height: 1px;
+  background: rgba(255, 255, 255, 0.1);
+  margin: 2px 4px;
 `
