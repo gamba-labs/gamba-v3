@@ -1,9 +1,9 @@
 import React from 'react'
 import styled, { css, keyframes } from 'styled-components'
-import { TOKENS } from '../../config/constants'
+import { TOKENS, tokenImageCandidates } from '../../config/constants'
 import { useBalance } from '../../hooks/useBalance'
 import { useToken } from '../../providers/TokenContext'
-import { MenuItem, MenuPanel, MenuWrapper, UiButton } from './primitives'
+import { MenuPanel, MenuWrapper, UiButton } from './primitives'
 
 const pulse = keyframes`
   0%, 100% {
@@ -15,57 +15,116 @@ const pulse = keyframes`
   }
 `
 
-const TokenChip = styled.div`
-  display: inline-flex;
+const StyledToken = styled.div`
+  display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
 `
 
-const TokenImage = styled.span<{ $image?: string }>`
+const StyledTokenImage = styled.span`
   width: 20px;
   height: 20px;
+  aspect-ratio: 1 / 1;
   border-radius: 50%;
-  display: inline-grid;
+  display: grid;
   place-items: center;
   background: #2a2a38;
   color: #fff;
   font-size: 11px;
   font-weight: 700;
-
-  ${({ $image }) =>
-    $image &&
-    css`
-      background-image: url(${$image});
-      background-size: cover;
-      background-position: center;
-      color: transparent;
-    `}
+  overflow: hidden;
 `
 
-const TokenTicker = styled.span`
-  font-weight: 500;
+const StyledTokenImageImg = styled.img`
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
 `
 
-const BalanceDisplay = styled.span<{ $updating?: boolean }>`
+const StyledBalance = styled.span<{ $updating?: boolean }>`
   font-variant-numeric: tabular-nums;
-  min-width: 60px;
-  text-align: right;
+  font-weight: 500;
 
-  ${(p) =>
-    p.$updating &&
+  ${(props) =>
+    props.$updating &&
     css`
       animation: ${pulse} 0.5s ease;
     `}
 `
 
-const MenuMeta = styled.span`
+const StyledTokenButton = styled.button<{ $selected?: boolean }>`
+  all: unset;
+  box-sizing: border-box;
+  background: none;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px;
+  border-radius: 7px;
+
+  &:hover {
+    background: #ffffff11;
+  }
+
+  ${(props) =>
+    props.$selected &&
+    css`
+      background: #ffffff16;
+    `}
+`
+
+const PoolLabel = styled.span`
+  opacity: 0.65;
+  font-size: 11px;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  margin-left: 8px;
+  white-space: nowrap;
+`
+
+const BalanceWrap = styled.div`
+  display: inline-flex;
+  align-items: center;
+`
+
+const EmptyState = styled.span`
   opacity: 0.7;
   font-size: 13px;
   font-variant-numeric: tabular-nums;
 `
 
+function TokenAvatar({ ticker, images }: { ticker: string; images?: string[] }) {
+  const [imageIndex, setImageIndex] = React.useState(0)
+  const key = React.useMemo(() => (images ?? []).join('|'), [images])
+  const src = images?.[imageIndex]
+
+  React.useEffect(() => {
+    setImageIndex(0)
+  }, [key])
+
+  return (
+    <StyledTokenImage>
+      {src ? (
+        <StyledTokenImageImg
+          src={src}
+          alt={ticker}
+          onError={() => setImageIndex((value) => value + 1)}
+        />
+      ) : (
+        ticker.slice(0, 1)
+      )}
+    </StyledTokenImage>
+  )
+}
+
 export function TokenSelect() {
-  const { tokens, selected, setSelected } = useToken()
+  const { pools, selected, selectedPoolOption, setSelectedPool } = useToken()
   const { balances } = useBalance()
 
   const [open, setOpen] = React.useState(false)
@@ -73,7 +132,8 @@ export function TokenSelect() {
   const [updating, setUpdating] = React.useState(false)
   const rootRef = React.useRef<HTMLDivElement>(null)
 
-  const selectedCfg = React.useMemo(() => TOKENS.find((token) => token.id === selected.id), [selected.id])
+  const tokenMap = React.useMemo(() => new Map(TOKENS.map((token) => [token.id, token])), [])
+  const selectedCfg = tokenMap.get(selected.id)
   const currentBalance = balances[selected.id]
 
   React.useEffect(() => {
@@ -102,32 +162,46 @@ export function TokenSelect() {
   return (
     <div ref={rootRef} style={{ position: 'relative' }}>
       <UiButton onClick={() => setOpen((value) => !value)} aria-haspopup="listbox" aria-expanded={open}>
-        <TokenChip>
-          <TokenImage $image={selectedCfg?.image}>{selected.ticker.slice(0, 1)}</TokenImage>
-          <TokenTicker>{selected.ticker}</TokenTicker>
-        </TokenChip>
-        <BalanceDisplay $updating={updating}>{balances[selected.id] ?? '--'}</BalanceDisplay>
+        <StyledToken>
+          <TokenAvatar
+            ticker={selected.ticker}
+            images={selectedCfg ? tokenImageCandidates(selectedCfg) : undefined}
+          />
+          <StyledBalance $updating={updating}>
+            {(balances[selected.id] ?? '0')} {selected.ticker}
+          </StyledBalance>
+        </StyledToken>
       </UiButton>
 
       {open && (
         <MenuWrapper>
           <MenuPanel>
-            {tokens.map((token) => {
-              const cfg = TOKENS.find((item) => item.id === token.id)
+            {pools.length === 0 && <EmptyState>No pools configured.</EmptyState>}
+            {pools.map((pool) => {
+              const token = tokenMap.get(pool.tokenId)
+              if (!token) return null
+              const isSelected = selectedPoolOption.id === pool.id
+              const isCustomLabel = pool.label && pool.label.trim().length > 0 && pool.label !== token.ticker
+
+              const balance = balances[token.id] ?? '0'
+
               return (
-                <MenuItem
-                  key={token.id}
+                <StyledTokenButton
+                  key={pool.id}
+                  $selected={isSelected}
                   onClick={() => {
-                    setSelected(token)
+                    setSelectedPool(pool.id)
                     setOpen(false)
                   }}
                 >
-                  <TokenChip>
-                    <TokenImage $image={cfg?.image}>{token.ticker.slice(0, 1)}</TokenImage>
-                    <TokenTicker>{token.ticker}</TokenTicker>
-                  </TokenChip>
-                  <MenuMeta>{balances[token.id] ?? '--'}</MenuMeta>
-                </MenuItem>
+                  <StyledToken>
+                    <TokenAvatar ticker={token.ticker} images={tokenImageCandidates(token)} />
+                    <BalanceWrap>
+                      {balance} {token.ticker}
+                      {isCustomLabel && <PoolLabel>{pool.label}</PoolLabel>}
+                    </BalanceWrap>
+                  </StyledToken>
+                </StyledTokenButton>
               )
             })}
           </MenuPanel>

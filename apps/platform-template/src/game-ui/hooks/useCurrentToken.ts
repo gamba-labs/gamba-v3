@@ -1,5 +1,5 @@
 import React from 'react'
-import { TOKENS } from '../../config/constants'
+import { TOKENS, tokenImageCandidates } from '../../config/constants'
 import { useToken } from '../../providers/TokenContext'
 
 export type UiTokenMeta = {
@@ -18,12 +18,12 @@ export function useCurrentToken(): UiTokenMeta {
     const cfg = TOKENS.find((token) => token.id === selected.id)
 
     return {
-      mint: String(selectedPool?.underlyingTokenMint ?? cfg?.mint ?? ''),
+      mint: String(selectedPool?.underlyingTokenMint ?? selected.mint ?? cfg?.mint ?? ''),
       name: cfg?.ticker ?? selected.ticker,
       symbol: cfg?.ticker ?? selected.ticker,
       decimals: cfg?.decimals ?? 0,
       baseWager: Math.max(1, Math.round(cfg?.baseWager ?? 1)),
-      image: cfg?.image ?? '/gamba.svg',
+      image: cfg ? (tokenImageCandidates(cfg)[0] ?? '/gamba.svg') : '/gamba.svg',
     }
-  }, [selected.id, selected.ticker, selectedPool?.underlyingTokenMint])
+  }, [selected.id, selected.ticker, selected.mint, selectedPool?.underlyingTokenMint])
 }

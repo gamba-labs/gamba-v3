@@ -30,6 +30,15 @@ export const List = styled.div`
   gap: 8px;
   max-height: 420px;
   overflow-y: auto;
+  -ms-overflow-style: none;  /* IE/Edge legacy */
+  scrollbar-width: none;     /* Firefox */
+
+  &::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+    display: none; /* Chrome/Brave/Safari/Edge */
+    background: transparent;
+  }
 `
 
 export const Recent = styled.button`

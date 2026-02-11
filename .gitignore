@@ -7,3 +7,6 @@ trash.*
 .turbo
 .env
 .next/
+
+# Local legacy repo cache (reference only, never committed)
+.repo-cache/

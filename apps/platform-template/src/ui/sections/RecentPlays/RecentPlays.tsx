@@ -2,7 +2,7 @@ import React from 'react'
 import bs58 from 'bs58'
 import { core, pdas } from '@gamba/core'
 import type { Address } from '@solana/kit'
-import { TOKENS, DEFAULT_POOL_AUTHORITY, RECENT_PLAYS_SCOPE } from '../../../config/constants'
+import { TOKENS, POOLS, DEFAULT_POOL_AUTHORITY, RECENT_PLAYS_SCOPE, tokenImageCandidates } from '../../../config/constants'
 import { GAMES } from '../../../games'
 import {
   Action,
@@ -83,10 +83,18 @@ export function RecentPlays({ limit = 15 }: { limit?: number }) {
 
   const getPlatformPools = React.useCallback(async (): Promise<Set<string>> => {
     const out = new Set<string>()
-    for (const t of TOKENS) {
+    const tokenById = new Map(TOKENS.map((token) => [token.id, token]))
+    for (const pool of POOLS) {
+      const token = tokenById.get(pool.tokenId)
+      if (!token) continue
       try {
-        const authority = (t.poolAuthority ?? DEFAULT_POOL_AUTHORITY) as Address
-        const p = await pdas.derivePoolPda(t.mint as Address, authority)
+        if (pool.poolAddress) {
+          out.add(String(pool.poolAddress))
+          continue
+        }
+
+        const authority = (pool.poolAuthority ?? DEFAULT_POOL_AUTHORITY) as Address
+        const p = await pdas.derivePoolPda(token.mint as Address, authority)
         out.add(String(p))
       } catch {}
     }
@@ -180,7 +188,11 @@ export function RecentPlays({ limit = 15 }: { limit?: number }) {
     const d = getDecimals(mint)
     return (n / Math.pow(10, d)).toFixed(Math.min(4, d))
   }
-  const getTokenImage = (mint: Address): string | undefined => TOKENS.find((t) => String(t.mint) === String(mint))?.image
+  const getTokenImage = (mint: Address): string | undefined => {
+    const token = TOKENS.find((t) => String(t.mint) === String(mint))
+    if (!token) return undefined
+    return tokenImageCandidates(token)[0]
+  }
   const getGameImage = (metadata: string): string => {
     try {
       const parsed = JSON.parse(metadata || '{}') as { gameId?: string; id?: string; game?: string; name?: string }

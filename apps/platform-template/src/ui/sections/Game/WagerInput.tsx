@@ -1,6 +1,6 @@
 import React from 'react'
 import styled, { css } from 'styled-components'
-import { TOKENS } from '../../../config/constants'
+import { TOKENS, tokenImageCandidates } from '../../../config/constants'
 import { useBalance } from '../../../hooks/useBalance'
 import { useToken } from '../../../providers/TokenContext'
 import { formatTokenAmount, toLamports } from './tokenAmount'
@@ -159,7 +159,12 @@ export function WagerInput(props: WagerInputProps) {
   const token = React.useMemo(() => TOKENS.find((entry) => entry.id === selected.id), [selected.id])
   const decimals = token?.decimals ?? 0
   const ticker = token?.ticker ?? ''
-  const tokenImage = token?.image ?? '/gamba.svg'
+  const tokenImages = React.useMemo(() => {
+    if (!token) return ['/gamba.svg']
+    return [...tokenImageCandidates(token), '/gamba.svg']
+  }, [token])
+  const [tokenImageIndex, setTokenImageIndex] = React.useState(0)
+  const tokenImage = tokenImages[tokenImageIndex] ?? '/gamba.svg'
   const baseWager = Math.max(1, Math.round(token?.baseWager ?? Math.pow(10, Math.max(0, decimals))))
   const available = toSafeNumber(rawBalances[selected.id] ?? 0n)
 
@@ -190,6 +195,10 @@ export function WagerInput(props: WagerInputProps) {
     props.onChange(baseWager)
     setIsEditing(false)
   }, [selected.id, baseWager])
+
+  React.useEffect(() => {
+    setTokenImageIndex(0)
+  }, [selected.id, token?.image, token?.mint])
 
   const setPreset = (multiplier: number) => {
     props.onChange(clamp(multiplier * baseWager))
@@ -223,7 +232,7 @@ export function WagerInput(props: WagerInputProps) {
     <div ref={ref} className={props.className} style={{ position: 'relative' }}>
       <StyledWagerInput $edit={isEditing}>
         <Flex onClick={startEditInput} disabled={props.disabled}>
-          <TokenImage src={tokenImage} alt={ticker} />
+          <TokenImage src={tokenImage} alt={ticker} onError={() => setTokenImageIndex((value) => value + 1)} />
           {!isEditing || props.options ? (
             <WagerAmount title={`${formatTokenAmount(props.value, decimals)} ${ticker}`}>
               <span>{formatTokenAmount(props.value, decimals)}</span>
@@ -261,7 +270,7 @@ export function WagerInput(props: WagerInputProps) {
         <StyledPopup>
           {props.options.map((option, index) => (
             <button key={`${option}-${index}`} disabled={props.disabled} onClick={() => setPreset(option)}>
-              <TokenImage src={tokenImage} alt={ticker} />
+              <TokenImage src={tokenImage} alt={ticker} onError={() => setTokenImageIndex((value) => value + 1)} />
               <span>{formatTokenAmount(option * baseWager, decimals)}</span>
               <Ticker>{ticker}</Ticker>
             </button>

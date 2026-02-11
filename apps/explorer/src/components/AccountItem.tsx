@@ -1,0 +1,68 @@
+import { useBonfidaName, usePlatformMeta } from "@/hooks"
+import { Avatar, Flex, Text } from "@radix-ui/themes"
+import { minidenticon } from 'minidenticons'
+import React from "react"
+
+interface AccountItemProps {
+  address: string
+  name?: string
+  image?: string
+  color?: React.ComponentProps<typeof Avatar>["color"]
+  avatarSize?: React.ComponentProps<typeof Avatar>["size"]
+}
+
+export const truncateString = (s: string, startLen = 4, endLen = startLen) => s.slice(0, startLen) + "..." + s.slice(-endLen)
+
+type AccountItemProps2 = Pick<AccountItemProps, "avatarSize" | "address">
+
+export function PlatformAccountItem(props: AccountItemProps2) {
+  const meta = usePlatformMeta(props.address)
+  return (
+    <AccountItem
+      {...props}
+      image={meta.image}
+      name={meta.name}
+    />
+  )
+}
+
+export function Identicon(props: AccountItemProps2) {
+  const domainName = useBonfidaName(props.address)
+  const image = React.useMemo(() => 'data:image/svg+xml;utf8,' + encodeURIComponent(minidenticon(props.address.toString())), [props.address])
+  return (
+    <Avatar
+      size={props.avatarSize ?? "1"}
+      src={image}
+      fallback={props.address.toString().substring(0, 2)}
+    />
+  )
+}
+
+export function PlayerAccountItem(props: AccountItemProps2) {
+  const domainName = useBonfidaName(props.address)
+  const image = React.useMemo(() => 'data:image/svg+xml;utf8,' + encodeURIComponent(minidenticon(props.address.toString())), [props.address])
+  return (
+    <AccountItem
+      color="orange"
+      {...props}
+      name={domainName}
+      image={image}
+    />
+  )
+}
+
+export function AccountItem({ address, name, image, color, avatarSize }: AccountItemProps) {
+  return (
+    <Flex gap="2" align="center">
+      <Avatar
+        size={avatarSize ?? "1"}
+        color={color}
+        src={image}
+        fallback={address.toString().substring(0, 2)}
+      />
+      <Text>
+        {name ?? truncateString(address.toString())}
+      </Text>
+    </Flex>
+  )
+}

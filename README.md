@@ -14,6 +14,7 @@ Stable release:
 
 - `apps/platform-template`: Primary template app and first consumer of `@gamba/react`.
 - `apps/basic-example`: Debug app using `@gamba/core`.
+- `apps/explorer`: Explorer app rebuilt for v3 using connector + `@gamba/react` + `@gamba/core` instructions.
 
 ## Migration Status
 

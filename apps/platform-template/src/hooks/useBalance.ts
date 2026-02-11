@@ -16,6 +16,22 @@ function base64ToBytes(b64: string): Uint8Array {
   return out
 }
 
+function formatBalanceDisplay(rawAmount: bigint, decimals: number): string {
+  const amount = Number(rawAmount) / Math.pow(10, decimals)
+  if (!Number.isFinite(amount) || amount <= 0) return '0'
+
+  if (amount >= 1) {
+    return amount.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 })
+  }
+  if (amount >= 0.01) {
+    return amount.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 4 })
+  }
+  if (amount >= 0.0001) {
+    return amount.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 6 })
+  }
+  return '<0.0001'
+}
+
 export function useBalance() {
   const { rpc, wsUrl } = useGambaRpc()
   const { account, isConnected } = useConnector()
@@ -45,15 +61,14 @@ export function useBalance() {
             if (isSol) {
               const res = await rpc.getBalance(userAddress).send()
               const lamports = BigInt((res as any)?.value ?? res ?? 0)
-              const ui = Number(lamports) / 1e9
-              return [cfg.id, ui.toFixed(4), lamports] as const
+              const ui = formatBalanceDisplay(lamports, 9)
+              return [cfg.id, ui, lamports] as const
             }
 
             const ata = await pdas.deriveAta(userAddress, cfg.mint as Address)
             const res = await rpc.getTokenAccountBalance(ata).send()
             const raw = BigInt((res?.value?.amount ?? '0') as string)
-            const uiAmountString = res?.value?.uiAmountString as string | undefined
-            const ui = uiAmountString ?? (Number(raw) / Math.pow(10, cfg.decimals ?? 0)).toFixed(4)
+            const ui = formatBalanceDisplay(raw, cfg.decimals ?? 0)
             return [cfg.id, ui, raw] as const
           } catch {
             return [cfg.id, '0', 0n] as const
@@ -89,16 +104,16 @@ export function useBalance() {
             .accountNotifications(userAddress, { commitment: 'confirmed', encoding: 'base64' })
             .subscribe({ abortSignal: abortController.signal })
 
-          for await (const notification of notifications) {
-            if (closed) break
-            try {
-              const lamports = BigInt((notification.value as any)?.lamports ?? 0)
-              const ui = Number(lamports) / 1e9
-              setBalances((prev) => ({ ...prev, sol: ui.toFixed(4) }))
-              setRawBalances((prev) => ({ ...prev, sol: lamports }))
-            } catch {}
-          }
-        } catch {}
+            for await (const notification of notifications) {
+              if (closed) break
+              try {
+                const lamports = BigInt((notification.value as any)?.lamports ?? 0)
+                const ui = formatBalanceDisplay(lamports, 9)
+                setBalances((prev) => ({ ...prev, sol: ui }))
+                setRawBalances((prev) => ({ ...prev, sol: lamports }))
+              } catch {}
+            }
+          } catch {}
       })()
 
       for (const cfg of TOKENS) {
@@ -124,8 +139,8 @@ export function useBalance() {
                   const amountBytes = bytes.slice(64, 72)
                   const amount = amountBytes.reduce((acc, byte, i) => acc + BigInt(byte) * (256n ** BigInt(i)), 0n)
                   const decimals = cfg.decimals ?? 0
-                  const ui = Number(amount) / Math.pow(10, decimals)
-                  setBalances((prev) => ({ ...prev, [cfg.id]: ui.toFixed(4) }))
+                  const ui = formatBalanceDisplay(amount, decimals)
+                  setBalances((prev) => ({ ...prev, [cfg.id]: ui }))
                   setRawBalances((prev) => ({ ...prev, [cfg.id]: amount }))
                 }
               } catch {}
