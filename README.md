@@ -1,23 +1,55 @@
-# Gamba v3 (Work In Progress)
+# Gamba v3
 
-This repo is an experimental, simplified rewrite focused on Solana Kit and a clean package surface.
+This repo is the v3 rewrite focused on Solana Kit + a cleaner package/app surface.
 
-Stable release:
+Stable legacy release:
 - [gamba-labs/gamba](https://github.com/gamba-labs/gamba)
 
-## Package Model
+## Requirements
 
-- `@gamba/core`: Chain/program logic, codama-generated accounts/instructions, PDA helpers.
-- `@gamba/react`: Minimal React integration for v1 (`GambaReactProvider`, `useGambaRpc`, `useSendSmartTransaction`, account fetch hooks).
+- Node `>=22`
+- pnpm `10.29.3` (pinned via `packageManager`)
+
+## Packages
+
+- `@gamba/core`: Program/codama logic, PDA helpers, instruction builders.
+- `@gamba/react`: React provider/hooks for RPC, state reads, and smart sends.
 
 ## Apps
 
-- `apps/platform-template`: Primary template app and first consumer of `@gamba/react`.
-- `apps/basic-example`: Debug app using `@gamba/core`.
-- `apps/explorer`: Explorer app rebuilt for v3 using connector + `@gamba/react` + `@gamba/core` instructions.
+- `apps/explorer` (`http://localhost:4000`)
+- `apps/platform-template` (`http://localhost:4001`)
+- `apps/basic-example` (`http://localhost:4002`)
+
+## Setup
+
+```bash
+pnpm install
+```
+
+## Run
+
+Run everything (Turbo):
+
+```bash
+pnpm dev
+```
+
+Run a single app:
+
+```bash
+pnpm --filter @gamba/explorer dev
+pnpm --filter @gamba/platform-template dev
+pnpm --filter @gamba/basic-example dev
+```
+
+## Build
+
+```bash
+pnpm build
+```
 
 ## Migration Status
 
-- `@gamba/core` + `@gamba/react` architecture is active.
-- Platform template migrated to `@gamba/core` + `@gamba/react`.
-- Basic example migrated to `@gamba/core`.
+- `@gamba/core` + `@gamba/react` are active and used by all current apps.
+- Explorer is rebuilt on v3 stack (`@solana/connector`, `@gamba/react`, `@gamba/core`).
