@@ -5,11 +5,11 @@ export default defineConfig({
   plugins: [react()],
   assetsInclude: ['**/*.glb'],
   server: {
-    port: 5174,
+    port: 4001,
     strictPort: true,
   },
   preview: {
-    port: 5174,
+    port: 4001,
     strictPort: true,
   },
 })

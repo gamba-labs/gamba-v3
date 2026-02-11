@@ -38,12 +38,12 @@ export interface UiPool {
   plays: number
 }
 
-async function getTokenAmount(rpc: any, tokenAccount: Address): Promise<bigint> {
+async function getTokenAmount(rpc: any, tokenAccount: Address): Promise<bigint | null> {
   try {
     const response = await rpc.getTokenAccountBalance(tokenAccount).send()
     return BigInt((response as any)?.value?.amount ?? '0')
   } catch {
-    return 0n
+    return null
   }
 }
 
@@ -63,20 +63,25 @@ export async function fetchPoolDetails(rpc: any, poolAddress: Address): Promise<
   const data = pool.data as any
   const underlyingTokenMint = String(data.underlyingTokenMint)
   const poolAuthority = String(data.poolAuthority)
-  const liquidity = toBigInt(data.liquidityCheckpoint)
+  const liquidityCheckpoint = toBigInt(data.liquidityCheckpoint)
 
-  const [lpMint, poolBonusUnderlyingTokenAccount, poolJackpotTokenAccount] = await Promise.all([
+  const [poolUnderlyingTokenAccount, lpMint, poolBonusUnderlyingTokenAccount, poolJackpotTokenAccount] = await Promise.all([
+    pdas.derivePoolUnderlyingTokenAccountPda(poolAddress),
     pdas.derivePoolLpMintPda(poolAddress),
     pdas.derivePoolBonusUnderlyingTokenAccountPda(poolAddress),
     pdas.derivePoolJackpotTokenAccountPda(poolAddress),
   ])
 
-  const [lpSupply, bonusBalance, jackpotBalance] = await Promise.all([
+  const [liquidityMaybe, lpSupply, bonusBalanceMaybe, jackpotBalanceMaybe] = await Promise.all([
+    getTokenAmount(rpc, poolUnderlyingTokenAccount),
     getTokenSupply(rpc, lpMint),
     getTokenAmount(rpc, poolBonusUnderlyingTokenAccount),
     getTokenAmount(rpc, poolJackpotTokenAccount),
   ])
 
+  const liquidity = liquidityMaybe ?? liquidityCheckpoint
+  const bonusBalance = bonusBalanceMaybe ?? 0n
+  const jackpotBalance = jackpotBalanceMaybe ?? 0n
   const ratio = lpSupply === 0n ? 1 : Number(liquidity) / Number(lpSupply)
 
   return {
@@ -111,19 +116,25 @@ export async function fetchPools(rpc: any): Promise<UiPool[]> {
       const publicKey = String(item.pubkey)
       const underlyingTokenMint = String(decoded.underlyingTokenMint)
       const poolAuthority = String(decoded.poolAuthority)
-      const liquidity = toBigInt(decoded.liquidityCheckpoint)
+      const liquidityCheckpoint = toBigInt(decoded.liquidityCheckpoint)
 
-      const [lpMint, poolBonusUnderlyingTokenAccount, poolJackpotTokenAccount] = await Promise.all([
+      const [poolUnderlyingTokenAccount, lpMint, poolBonusUnderlyingTokenAccount, poolJackpotTokenAccount] = await Promise.all([
+        pdas.derivePoolUnderlyingTokenAccountPda(publicKey as Address),
         pdas.derivePoolLpMintPda(publicKey as Address),
         pdas.derivePoolBonusUnderlyingTokenAccountPda(publicKey as Address),
         pdas.derivePoolJackpotTokenAccountPda(publicKey as Address),
       ])
 
-      const [lpSupply, bonusBalance, jackpotBalance] = await Promise.all([
+      const [liquidityMaybe, lpSupply, bonusBalanceMaybe, jackpotBalanceMaybe] = await Promise.all([
+        getTokenAmount(rpc, poolUnderlyingTokenAccount),
         getTokenSupply(rpc, lpMint),
         getTokenAmount(rpc, poolBonusUnderlyingTokenAccount),
         getTokenAmount(rpc, poolJackpotTokenAccount),
       ])
+
+      const liquidity = liquidityMaybe ?? liquidityCheckpoint
+      const bonusBalance = bonusBalanceMaybe ?? 0n
+      const jackpotBalance = jackpotBalanceMaybe ?? 0n
 
       return {
         publicKey,

@@ -12,7 +12,7 @@ Explorer app rebuilt for the v3 stack:
 pnpm --filter @gamba/explorer dev
 ```
 
-Server runs on `http://localhost:5175`.
+Server runs on `http://localhost:4000`.
 
 ## Build
 
