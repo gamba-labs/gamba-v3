@@ -95,6 +95,42 @@ export const GAMES: GameBundle[] = [
     app: React.lazy(() => import('./Plinko')),
   },
   {
+    id: 'jackpot',
+    meta: {
+      background: '#38acc9',
+      name: 'Jackpot',
+      image: '/games/jackpot.png',
+      description:
+        'Join a live multiplayer pot where every player adds to the prize pool and one winner takes the payout.',
+      tag: 'Multiplayer',
+    },
+    app: React.lazy(() => import('./Jackpot')),
+  },
+  {
+    id: 'plinkorace',
+    meta: {
+      background: '#62cc34',
+      name: 'PlinkoRace',
+      image: '/games/plinkorace.png',
+      description:
+        'Multiplayer plinko race. Join a lobby, place your wager, and race other players to the target score.',
+      tag: 'Multiplayer',
+    },
+    app: React.lazy(() => import('./PlinkoRace')),
+  },
+  {
+    id: 'pvpflip',
+    meta: {
+      background: '#222a59',
+      name: 'PvpFlip',
+      image: '/games/pvpflip.png',
+      description:
+        'Create or join a 1v1 multiplayer coin flip. Pick a side, lock in your wager, and winner takes all.',
+      tag: 'Multiplayer',
+    },
+    app: React.lazy(() => import('./PvpFlip')),
+  },
+  {
     id: 'crash',
     meta: {
       background: '#de95e8',

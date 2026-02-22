@@ -177,3 +177,89 @@ if (bet.length === 0) throw new Error('Empty bet array')
 if (sum > bet.length) throw new Error('Player edge array is invalid')
 ```
 
+## 10. Multiplayer model (different from outcome arrays)
+
+Singleplayer and multiplayer are different paths:
+
+- Singleplayer (`useGambaPlay`) uses the outcome-array model described above.
+- Multiplayer uses the multiplayer program account model (`@gamba/core` multiplayer accounts + instructions).
+
+In multiplayer, players do **not** submit `bet` arrays per play. Instead they:
+- create a game lobby
+- join with a wager
+- optionally edit wager
+- wait for winner selection
+
+So the `sum(bet) <= length` rule is a **singleplayer** rule, not a multiplayer rule.
+
+## 11. Multiplayer lifecycle in this repo
+
+Main integration lives in:
+- `apps/platform-template/src/games/PlinkoRace/multiplayer.ts`
+
+Key client actions:
+- `createGame(...)`
+- `joinGame(...)`
+- `editBet(...)` (implemented as leave + join in one tx)
+- `leaveGame(...)`
+
+Game data flow:
+- list/poll games via `usePlinkoRaceGames(filters, pollMs)`
+- subscribe to one game via `usePlinkoRaceGame(gameAddress)`
+- read state from `game.state` (`Waiting`, `Playing`, `Settled`)
+- read winner(s) from `game.winnerIndexes`
+
+## 12. Multiplayer wager types
+
+Current multiplayer wager modes supported by core:
+- `SameWager`: everyone uses exactly `game.wager`
+- `CustomWager`: players can join with arbitrary wager
+- `BetRange`: players can join between `minBet` and `maxBet`
+
+This repo handles all three in UI (`Join`, `Edit Bet`, and create modal constraints).
+
+## 13. Multiplayer metadata pattern
+
+Player metadata is a fixed 32-byte field in multiplayer accounts and is used for lightweight per-player context.
+
+Examples in this repo:
+- PvpFlip stores side choice (`heads` / `tails`)
+- PlinkoRace uses optional short display names
+
+Pattern:
+- write metadata on join/edit
+- read metadata from multiplayer metadata PDA
+- keep payload short and deterministic
+
+## 14. Current multiplayer games in this repo
+
+### PlinkoRace (`apps/platform-template/src/games/PlinkoRace/*`)
+- Base multiplayer implementation.
+- Uses create/join/edit/leave against multiplayer program.
+- Filters game list by lobby constraints (players/winners/mint).
+- Renders race UI from multiplayer state and winner index.
+
+### PvpFlip (`apps/platform-template/src/games/PvpFlip/*`)
+- 1v1 multiplayer lobby on the same multiplayer primitives.
+- Side selection is encoded in player metadata (`heads`/`tails`).
+- Winner side is derived from `winnerIndexes -> winner player -> metadata side`.
+- Includes a local “Call a Bot” fallback path that exits multiplayer and executes a singleplayer flip.
+
+### Jackpot (`apps/platform-template/src/games/Jackpot/*`)
+- Multiplayer jackpot-style room UX on top of shared multiplayer hooks.
+- Uses creator/max-player/winner-target filters for the intended room family.
+- Supports join/edit/leave during waiting state and winner animation on settle.
+
+## 15. Multiplayer game checklist
+
+- Define lobby shape:
+  - `maxPlayers`
+  - `winnersTarget`
+  - `mint`
+  - wager mode (`SameWager` / `CustomWager` / `BetRange`)
+- Build create/join/edit/leave controls with guardrails for wager type bounds.
+- Subscribe to live game + metadata updates.
+- Handle all states (`Waiting`, `Playing`, `Settled`) explicitly in UI.
+- Render result from `winnerIndexes` (not local guesswork).
+- Keep metadata compact (<= 32 bytes effective payload).
+- Keep token math in atomic units (lamports / token decimals).

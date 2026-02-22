@@ -1,35 +1,35 @@
 import React from 'react'
-import styled from 'styled-components'
+import styled, { keyframes } from 'styled-components'
 import { LANDING_ACTIONS, LANDING_HEADLINE, LANDING_SUBHEAD, type LandingAction } from '../../../config/constants'
 
+const welcomeFadeIn = keyframes`
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+`
+
+const backgroundGradient = keyframes`
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
+`
+
 const WelcomeWrapper = styled.div`
-  @keyframes welcome-fade-in {
-    from {
-      opacity: 0;
-    }
-
-    to {
-      opacity: 1;
-    }
-  }
-
-  @keyframes backgroundGradient {
-    0% {
-      background-position: 0% 50%;
-    }
-
-    50% {
-      background-position: 100% 50%;
-    }
-
-    100% {
-      background-position: 0% 50%;
-    }
-  }
-
   background: linear-gradient(-45deg, #ffb07c, #ff3e88, #2969ff, #ef3cff, #ff3c87);
   background-size: 300% 300%;
-  animation: welcome-fade-in 0.5s ease, backgroundGradient 30s ease infinite;
+  animation: ${welcomeFadeIn} 0.5s ease, ${backgroundGradient} 30s ease infinite;
   border-radius: 12px;
   padding: 24px;
   display: flex;
@@ -91,7 +91,7 @@ const ActionButton = styled.button`
   font-size: 0.9rem;
   font-weight: 600;
   background: #ffffffdf;
-  color: black;
+  color: #000;
   cursor: pointer;
   transition: background-color 0.2s ease, transform 0.2s ease;
   flex-grow: 1;
