@@ -2,7 +2,12 @@
   "private": true,
   "scripts": {
     "build": "turbo run build",
-    "dev": "turbo run dev --cache=local:r,remote:r --continue",
+    "dev": "pnpm run dev:prepare && pnpm run dev:all",
+    "dev:prepare": "pnpm --filter @gamba/core build && pnpm --filter @gamba/react build",
+    "dev:all": "pnpm --parallel --filter @gamba/core --filter @gamba/react --filter @gamba/explorer --filter @gamba/platform-template --filter @gamba/basic-example dev",
+    "dev:apps": "pnpm --parallel --filter @gamba/explorer --filter @gamba/platform-template --filter @gamba/basic-example dev",
+    "dev:full": "turbo run dev --cache=local:r,remote:r --continue",
+    "dev:packages": "pnpm --parallel --filter @gamba/core --filter @gamba/react dev",
     "clean": "echo '🧹 Cleaning workspace...' && rm -rf node_modules apps/*/node_modules packages/*/node_modules apps/*/dist packages/*/dist .turbo apps/*/.turbo packages/*/.turbo pnpm-lock.yaml && echo '✨ Clean complete! Run pnpm install to reinstall.'",
     "changeset": "changeset",
     "version-packages": "changeset version"

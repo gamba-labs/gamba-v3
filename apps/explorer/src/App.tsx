@@ -53,31 +53,169 @@ const Logo = styled(NavLink)`
   }
 `
 
+const CONNECTOR_PAGE_SIZE = 6
+
+const ConnectModalTitle = styled.h2`
+  margin: 0;
+  font-size: 24px;
+  line-height: 1.1;
+`
+
+const ConnectModalSubtitle = styled.p`
+  margin: 6px 0 16px;
+  color: var(--gray-10);
+  font-size: 13px;
+`
+
+const ConnectorsList = styled.div`
+  display: grid;
+  gap: 10px;
+`
+
+const ConnectorButton = styled.button`
+  all: unset;
+  box-sizing: border-box;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  padding: 11px 12px;
+  border-radius: 12px;
+  background: var(--gray-3);
+  border: 1px solid var(--gray-6);
+  transition: border-color 0.15s ease, background 0.15s ease;
+
+  &:hover {
+    border-color: var(--gray-8);
+    background: var(--gray-4);
+  }
+
+  &:disabled {
+    cursor: default;
+    opacity: 0.62;
+  }
+`
+
+const ConnectorIdentity = styled.span`
+  display: inline-flex;
+  align-items: center;
+  gap: 11px;
+  font-weight: 500;
+`
+
+const ConnectorIcon = styled.span`
+  width: 24px;
+  height: 24px;
+  display: inline-grid;
+  place-items: center;
+  border-radius: 999px;
+  background: var(--gray-5);
+
+  img {
+    width: 20px;
+    height: 20px;
+    border-radius: 999px;
+  }
+`
+
+const ConnectorStatus = styled.span`
+  font-size: 11px;
+  line-height: 1;
+  color: var(--gray-11);
+  border: 1px solid var(--gray-6);
+  border-radius: 999px;
+  padding: 5px 8px;
+`
+
+const ConnectModalFooter = styled.div`
+  margin-top: 12px;
+  display: flex;
+  justify-content: center;
+`
+
+const LoadMoreConnectors = styled.button`
+  all: unset;
+  box-sizing: border-box;
+  cursor: pointer;
+  color: var(--gray-11);
+  font-size: 12px;
+  line-height: 1;
+  border: 1px solid var(--gray-7);
+  border-radius: 999px;
+  padding: 8px 12px;
+  transition: border-color 0.15s ease, background 0.15s ease;
+
+  &:hover {
+    border-color: var(--gray-9);
+    background: var(--gray-3);
+  }
+`
+
 function ConnectWalletDialog(props: { open: boolean; onOpenChange: (open: boolean) => void }) {
   const { connectors, connectWallet, isConnecting } = useConnector()
+  const [visibleCount, setVisibleCount] = React.useState(CONNECTOR_PAGE_SIZE)
+
+  const sortedConnectors = React.useMemo(
+    () =>
+      [...connectors].sort((a, b) => {
+        if (a.ready !== b.ready) return Number(b.ready) - Number(a.ready)
+        return a.name.localeCompare(b.name)
+      }),
+    [connectors],
+  )
+
+  const visibleConnectors = React.useMemo(
+    () => sortedConnectors.slice(0, visibleCount),
+    [sortedConnectors, visibleCount],
+  )
+
+  React.useEffect(() => {
+    if (!props.open) return
+    setVisibleCount(CONNECTOR_PAGE_SIZE)
+  }, [props.open])
+
+  const hasMore = sortedConnectors.length > visibleCount
 
   return (
     <Dialog.Root open={props.open} onOpenChange={props.onOpenChange}>
       <Dialog.Content maxWidth="420px">
-        <Dialog.Title>Connect Wallet</Dialog.Title>
-        <Dialog.Description size="2">Choose a wallet connector.</Dialog.Description>
-        <Flex direction="column" gap="2" mt="3">
-          {connectors.map((connector) => (
-            <Button
-              key={connector.id}
-              variant="soft"
-              disabled={isConnecting || !connector.ready}
-              onClick={async () => {
-                await connectWallet(connector.id)
-                props.onOpenChange(false)
-              }}
-            >
-              {connector.name}
-              {!connector.ready ? ' (Not installed)' : ''}
-            </Button>
-          ))}
-          {connectors.length === 0 && <Text color="gray">No wallet connectors detected.</Text>}
-        </Flex>
+        <ConnectModalTitle>Connect Wallet</ConnectModalTitle>
+        <ConnectModalSubtitle>Select a wallet to continue.</ConnectModalSubtitle>
+
+        {sortedConnectors.length === 0 ? (
+          <Text color="gray">No wallet connectors detected.</Text>
+        ) : (
+          <>
+            <ConnectorsList>
+              {visibleConnectors.map((connector) => (
+                <ConnectorButton
+                  key={connector.id}
+                  disabled={isConnecting || !connector.ready}
+                  onClick={async () => {
+                    await connectWallet(connector.id)
+                    props.onOpenChange(false)
+                  }}
+                >
+                  <ConnectorIdentity>
+                    <ConnectorIcon>{connector.icon && <img src={connector.icon} alt={connector.name} />}</ConnectorIcon>
+                    <span>{connector.name}</span>
+                  </ConnectorIdentity>
+                  <ConnectorStatus>{isConnecting ? 'Connecting...' : connector.ready ? 'Connect' : 'Not installed'}</ConnectorStatus>
+                </ConnectorButton>
+              ))}
+            </ConnectorsList>
+
+            {hasMore && (
+              <ConnectModalFooter>
+                <LoadMoreConnectors onClick={() => setVisibleCount((count) => count + CONNECTOR_PAGE_SIZE)}>
+                  Load more wallets
+                </LoadMoreConnectors>
+              </ConnectModalFooter>
+            )}
+          </>
+        )}
       </Dialog.Content>
     </Dialog.Root>
   )
