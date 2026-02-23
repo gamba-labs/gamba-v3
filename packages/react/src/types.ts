@@ -1,4 +1,5 @@
 import type { Address, Instruction } from '@solana/kit'
+import type { UseKitTransactionSignerReturn } from '@solana/connector'
 import type { PropsWithChildren } from 'react'
 
 export type GambaCommitment = 'processed' | 'confirmed' | 'finalized'
@@ -23,7 +24,7 @@ export type SimResult = unknown
 export type SendSmartTransactionResult = {
   simulate: (instructions: Instruction<Address>[]) => Promise<SimResult>
   send: (instructions: Instruction<Address>[]) => Promise<string>
-  signer: any
+  signer: UseKitTransactionSignerReturn['signer']
   ready: boolean
 }
 

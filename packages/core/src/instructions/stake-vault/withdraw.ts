@@ -1,8 +1,8 @@
 import { pdas, stakeVault } from '../..'
-import type { Address } from '@solana/kit'
+import type { Address, TransactionSigner } from '@solana/kit'
 
 type BuildWithdrawIxParams = {
-  staker: any
+  staker: TransactionSigner
   vault: Address
   userTokenAccount?: Address
   tokenMint: Address

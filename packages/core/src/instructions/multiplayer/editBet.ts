@@ -1,9 +1,9 @@
-import type { Address } from '@solana/kit'
+import type { Address, TransactionSigner } from '@solana/kit'
 import { buildLeaveGameInstruction } from './leaveGame'
 import { buildJoinGameInstruction } from './joinGame'
 
 type BuildEditBetIxParams = {
-  user: any
+  user: TransactionSigner
   gameAccount: Address
   // Optional: keep or change wager mint; defaults to WSOL in builders when omitted
   mint?: Address

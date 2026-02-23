@@ -1,8 +1,8 @@
 import { pdas, stakeVault } from '../..'
-import type { Address } from '@solana/kit'
+import type { Address, TransactionSigner } from '@solana/kit'
 
 type BuildInitializeVaultIxParams = {
-  authority: any
+  authority: TransactionSigner
   tokenMint: Address
   vault?: Address
   vaultTokenAccount?: Address

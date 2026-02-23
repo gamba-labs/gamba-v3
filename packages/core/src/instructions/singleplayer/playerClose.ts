@@ -1,8 +1,8 @@
 import { core, pdas } from '../..'
-import type { Address } from '@solana/kit'
+import type { Address, TransactionSigner } from '@solana/kit'
 
 type BuildPlayerCloseIxParams = {
-  user: any
+  user: TransactionSigner
   player?: Address
   game?: Address
 }

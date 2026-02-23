@@ -1,8 +1,8 @@
 import { core, pdas } from '../..'
-import type { Address } from '@solana/kit'
+import type { Address, TransactionSigner } from '@solana/kit'
 
 type BuildDistributeFeesIxParams = {
-  user: any
+  user: TransactionSigner
   underlyingTokenMint: Address
   distributionRecipient: Address
   nativeSol: boolean

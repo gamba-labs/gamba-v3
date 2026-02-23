@@ -1,8 +1,8 @@
 import { multiplayer as mp, pdas } from '../..'
-import type { Address } from '@solana/kit'
+import type { Address, TransactionSigner } from '@solana/kit'
 
 type BuildJoinGameIxParams = {
-  user: any
+  user: TransactionSigner
   gameAccount: Address
   mint?: Address
   creatorAddress?: Address

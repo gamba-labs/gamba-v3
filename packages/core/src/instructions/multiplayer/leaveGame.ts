@@ -1,8 +1,8 @@
 import { multiplayer as mp, pdas } from '../..'
-import type { Address } from '@solana/kit'
+import type { Address, TransactionSigner } from '@solana/kit'
 
 type BuildLeaveGameIxParams = {
-  user: any
+  user: TransactionSigner
   gameAccount: Address
   mint?: Address
   // Optional SPL-only accounts; if omitted we derive

@@ -24,9 +24,11 @@ export function useFetchState<T>(
   const refetch = React.useCallback(async () => {
     if (!enabled) {
       if (!mountedRef.current) return null
+      requestIdRef.current += 1
       setData(null)
       setError(null)
       setLoading(false)
+      setUpdatedAt(null)
       return null
     }
 
@@ -58,9 +60,11 @@ export function useFetchState<T>(
 
   React.useEffect(() => {
     if (!enabled) {
+      requestIdRef.current += 1
       setData(null)
       setError(null)
       setLoading(false)
+      setUpdatedAt(null)
       return
     }
     void refetch()

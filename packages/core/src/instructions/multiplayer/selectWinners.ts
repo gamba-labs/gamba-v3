@@ -1,8 +1,8 @@
 import { multiplayer as mp, pdas } from '../..'
-import type { Address } from '@solana/kit'
+import type { Address, TransactionSigner } from '@solana/kit'
 
 type BuildSelectWinnersIxParams = {
-  rng: any
+  rng: TransactionSigner
   gameAccount: Address
   // Optional overrides
   gambaState?: Address

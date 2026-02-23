@@ -1,8 +1,8 @@
 import { core, pdas } from '../..'
-import type { Address } from '@solana/kit'
+import type { Address, TransactionSigner } from '@solana/kit'
 
 type BuildPoolInitializeIxParams = {
-  initializer: any
+  initializer: TransactionSigner
   underlyingTokenMint: Address
   poolAuthority: Address
   lookupAddress: Address

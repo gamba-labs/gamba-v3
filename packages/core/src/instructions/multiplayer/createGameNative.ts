@@ -1,8 +1,8 @@
 import { multiplayer as mp, pdas } from '../..'
-import { type Address } from '@solana/kit'
+import { type Address, type TransactionSigner } from '@solana/kit'
 
 type BuildCreateGameNativeIxParams = {
-  user: any
+  user: TransactionSigner
   gameSeed?: number | bigint
   preAllocPlayers?: number
   maxPlayers: number

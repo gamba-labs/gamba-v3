@@ -16,6 +16,8 @@ import { useGambaRpc } from './useGambaRpc'
 import type { SendSmartTransactionResult, SimResult } from '../types'
 
 const COMPUTE_BUDGET_PROGRAM = 'ComputeBudget111111111111111111111111111111' as Address
+type FeePayerSigner = Parameters<typeof setTransactionMessageFeePayerSigner>[0]
+type BlockhashLifetime = Parameters<typeof setTransactionMessageLifetimeUsingBlockhash>[0]
 
 function createSetComputeUnitLimitInstruction(units: number): Instruction<Address> {
   const data = new Uint8Array(5)
@@ -43,11 +45,12 @@ export function useSendSmartTransaction(): SendSmartTransactionResult {
 
   const buildEncodedTransaction = React.useCallback(async (
     instructions: Instruction<Address>[],
-    latestBlockhash: any,
+    latestBlockhash: BlockhashLifetime,
+    feePayerSigner: FeePayerSigner,
   ) => {
     const message = pipe(
       createTransactionMessage({ version: 'legacy' }),
-      (m) => setTransactionMessageFeePayerSigner(signer as any, m),
+      (m) => setTransactionMessageFeePayerSigner(feePayerSigner, m),
       (m) => setTransactionMessageLifetimeUsingBlockhash(latestBlockhash, m),
       (m) => appendTransactionMessageInstructions(instructions, m),
     )
@@ -58,16 +61,18 @@ export function useSendSmartTransaction(): SendSmartTransactionResult {
       message,
       base64: toBase64(transactionBytes),
     }
-  }, [signer])
+  }, [])
 
   const simulate = React.useCallback(async (instructions: Instruction<Address>[]): Promise<SimResult> => {
     if (!isConnected || !ready || !signer) throw new Error('Wallet not connected')
     if (!instructions?.length) throw new Error('No instructions provided')
 
     const { value: latestBlockhash } = await rpc.getLatestBlockhash().send()
-    const { base64 } = await buildEncodedTransaction(instructions, latestBlockhash)
+    const feePayerSigner = signer as FeePayerSigner
+    const { base64 } = await buildEncodedTransaction(instructions, latestBlockhash, feePayerSigner)
+    const simulateTx = base64 as Parameters<typeof rpc.simulateTransaction>[0]
 
-    return rpc.simulateTransaction(base64 as any, {
+    return rpc.simulateTransaction(simulateTx, {
       encoding: 'base64',
       commitment: config.defaultCommitment,
       sigVerify: false,
@@ -79,12 +84,14 @@ export function useSendSmartTransaction(): SendSmartTransactionResult {
     if (!instructions?.length) throw new Error('No instructions provided')
 
     const { value: latestBlockhash } = await rpc.getLatestBlockhash().send()
+    const feePayerSigner = signer as FeePayerSigner
 
     let computeLimit = Math.ceil(config.defaultComputeUnits * config.computeUnitBuffer)
 
     try {
-      const { base64: simBase64 } = await buildEncodedTransaction(instructions, latestBlockhash)
-      const simResult = await rpc.simulateTransaction(simBase64 as any, {
+      const { base64: simBase64 } = await buildEncodedTransaction(instructions, latestBlockhash, feePayerSigner)
+      const simulateTx = simBase64 as Parameters<typeof rpc.simulateTransaction>[0]
+      const simResult = await rpc.simulateTransaction(simulateTx, {
         encoding: 'base64',
         commitment: config.defaultCommitment,
         sigVerify: false,
@@ -106,14 +113,15 @@ export function useSendSmartTransaction(): SendSmartTransactionResult {
 
     const message = pipe(
       createTransactionMessage({ version: 'legacy' }),
-      (m) => setTransactionMessageFeePayerSigner(signer as any, m),
+      (m) => setTransactionMessageFeePayerSigner(feePayerSigner, m),
       (m) => setTransactionMessageLifetimeUsingBlockhash(latestBlockhash, m),
       (m) => appendTransactionMessageInstructions(finalInstructions, m),
     )
 
     if (config.debug) {
+      const feePayerAddress = 'address' in feePayerSigner ? feePayerSigner.address : undefined
       console.debug('[useSendSmartTransaction] Prepared transaction', {
-        feePayer: (signer as any)?.address,
+        feePayer: feePayerAddress,
         computeLimit,
         instructionCount: finalInstructions.length,
       })
@@ -123,8 +131,9 @@ export function useSendSmartTransaction(): SendSmartTransactionResult {
     const transactionEncoder = getTransactionEncoder()
     const transactionBytes = transactionEncoder.encode(signedTransaction)
     const transactionBase64 = toBase64(transactionBytes)
+    const sendTx = transactionBase64 as Parameters<typeof rpc.sendTransaction>[0]
 
-    const signature = await rpc.sendTransaction(transactionBase64 as any, {
+    const signature = await rpc.sendTransaction(sendTx, {
       encoding: 'base64',
       skipPreflight: false,
       preflightCommitment: config.defaultCommitment,

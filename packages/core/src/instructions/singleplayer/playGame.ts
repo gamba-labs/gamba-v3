@@ -1,8 +1,19 @@
 import { core, pdas } from '../..'
-import type { Address } from '@solana/kit'
+import type { Address, TransactionSigner } from '@solana/kit'
+
+type BuildPlayGameRpc = Parameters<typeof core.fetchPool>[0] & {
+  getTokenAccountBalance: (
+    address: Address,
+    ...rest: readonly unknown[]
+  ) => {
+    send: () => Promise<{ value?: { amount?: string } }>
+  }
+}
+
+type PoolData = Awaited<ReturnType<typeof core.fetchPool>>['data']
 
 type BuildPlayGameIxParams = {
-  user: any
+  user: TransactionSigner
   pool: Address
   underlyingTokenMint?: Address
   userUnderlyingAta?: Address
@@ -16,7 +27,7 @@ type BuildPlayGameIxParams = {
   // Optional: auto include bonus if wallet has balance
   autoIncludeBonus?: boolean
   // Optional: RPC helper for balance detection (expects Solana-kit-like shape)
-  rpc?: any
+  rpc?: BuildPlayGameRpc
   // Optional precomputed accounts for flexibility
   player?: Address
   game?: Address
@@ -50,11 +61,11 @@ export async function buildPlayGameInstruction(params: BuildPlayGameIxParams) {
   const creator = params.creator ?? (user.address as Address)
   // Resolve underlying from pool if not provided (via codama helper)
   let resolvedUnderlying = underlyingTokenMint
-  let poolData: any = null
+  let poolData: PoolData | null = null
   if (!resolvedUnderlying || (autoIncludeBonus && rpc)) {
     if (!rpc) throw new Error('rpc required to resolve pool data')
     const poolAccount = await core.fetchPool(rpc, pool)
-    poolData = poolAccount.data as any
+    poolData = poolAccount.data
     if (!resolvedUnderlying) {
       resolvedUnderlying = poolData.underlyingTokenMint as Address
     }
@@ -130,5 +141,4 @@ export async function buildPlayGameInstruction(params: BuildPlayGameIxParams) {
 
   return ix
 }
-
 

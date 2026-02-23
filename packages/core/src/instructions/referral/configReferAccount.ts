@@ -1,8 +1,8 @@
 import { referral, pdas } from '../..'
-import type { Address } from '@solana/kit'
+import type { Address, TransactionSigner } from '@solana/kit'
 
 type BuildConfigReferAccountIxParams = {
-  authority: any
+  authority: TransactionSigner
   referrer: Address
   creator: Address
   referAccount?: Address

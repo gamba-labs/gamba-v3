@@ -1,8 +1,8 @@
 import { multiplayer as mp, pdas } from '../..'
-import { type Address } from '@solana/kit'
+import { type Address, type TransactionSigner } from '@solana/kit'
 
 type BuildCreateGameSplIxParams = {
-  user: any
+  user: TransactionSigner
   mint: Address
   gameSeed?: number | bigint
   preAllocPlayers?: number
